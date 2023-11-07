@@ -1,0 +1,58 @@
+ext {
+    // Sdk and tools
+    compileSdkVersion = 31
+    minSdkVersion = 21
+    targetSdkVersion = 31
+
+    //AndroidX
+    core_version = '1.5.0'
+    appcompat_version = '1.1.0'
+    activity_version = '1.2.0'
+    fragment_version = '1.2.5'
+    lifecycle_version = '2.2.0'
+
+    exoPlayerVersion = '2.14.0'
+    // App dependencies
+    supportV13Version = '23.+'
+    appcompatV7Version = '25.3.1'
+    supportV4Version = '23.1.1'
+    recyclerviewVersion = '22.+'
+    designVersion = '25.0.1'
+    cardviewVersion = '23.+'
+    multidexVersion = '1.0.1'
+
+    // lib dependencies
+    gsonVersion = '2.7'
+    googleZxingCoreVersion = '3.1.0'
+
+    nineoldandroidsVersion = '2.4.0'
+
+    rxJavaVersion = '2.0.0'
+    rxAndroidVersion = '2.0.1'
+    rxpermissionsVersion = '0.9.3@aar'
+
+    retrofitVersion = '2.1.0'
+    retrofitGsonVersion = '2.1.0'
+
+
+}
+
+
+
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:7.0.3"
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
