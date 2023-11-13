@@ -6,7 +6,7 @@ android {
     compileSdk rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        minSdk rootProject.ext.compileSdkVersion
+        minSdk rootProject.ext.minSdkVersion
         targetSdk rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
@@ -28,10 +28,19 @@ android {
 
 dependencies {
 
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'com.google.android.material:material:1.3.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    //原生开始
+    implementation "com.google.android.material:material:$rootProject.ext.material_version"
+    implementation "androidx.appcompat:appcompat:$rootProject.ext.appcompat_version"
+    implementation "androidx.core:core:$rootProject.ext.core_version"
+    implementation "androidx.core:core-ktx:$rootProject.ext.core_version"
+    implementation "androidx.recyclerview:recyclerview:$rootProject.ext.recyclerview_version"
+    implementation "androidx.activity:activity-ktx:$rootProject.ext.activity_version"
+    implementation "androidx.fragment:fragment-ktx:$rootProject.ext.fragment_version"
+    implementation "androidx.constraintlayout:constraintlayout:$rootProject.ext.constraintlayout_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    //原生结束
 }
