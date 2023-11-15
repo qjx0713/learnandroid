@@ -24,6 +24,11 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    //DataBinding配置
+    dataBinding {
+        enabled = true
+    }
 }
 
 dependencies {
@@ -43,4 +48,13 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:$rootProject.ext.constraintlayout_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     //原生结束
+
+    //Lifecycle start
+    // ViewModel
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$rootProject.ext.lifecycle_version"
+    // LiveData
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$rootProject.ext.lifecycle_version"
+    //如果用Java8, 用于替代compiler
+    implementation "androidx.lifecycle:lifecycle-common-java8:$rootProject.ext.lifecycle_version"
+    //Lifecycle end
 }
