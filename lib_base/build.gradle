@@ -1,14 +1,13 @@
 plugins {
-    id 'com.android.application'
+    id 'com.android.library'
 }
 
 android {
-    compileSdk 31
+    compileSdk rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        applicationId "indi.qjx.learnandroid"
-        minSdk 21
-        targetSdk 31
+        minSdk rootProject.ext.minSdkVersion
+        targetSdk rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
 
@@ -33,6 +32,7 @@ android {
 }
 
 dependencies {
+
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
@@ -47,7 +47,14 @@ dependencies {
     implementation "androidx.fragment:fragment-ktx:$rootProject.ext.fragment_version"
     implementation "androidx.constraintlayout:constraintlayout:$rootProject.ext.constraintlayout_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    //原生结束
 
-    implementation project(":lib_base")
+    //Lifecycle start
+    // ViewModel
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$rootProject.ext.lifecycle_version"
+    // LiveData
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$rootProject.ext.lifecycle_version"
+    //如果用Java8, 用于替代compiler
+    implementation "androidx.lifecycle:lifecycle-common-java8:$rootProject.ext.lifecycle_version"
+    //Lifecycle end
+    //原生结束
 }
