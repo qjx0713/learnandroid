@@ -55,6 +55,6 @@ dependencies {
     // LiveData
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$rootProject.ext.lifecycle_version"
     //如果用Java8, 用于替代compiler
-    implementation "androidx.lifecycle:lifecycle-common-java8:$rootProject.ext.lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-runtime:$rootProject.ext.lifecycle_version"
     //Lifecycle end
 }

@@ -5,7 +5,7 @@ ext {
     targetSdkVersion = 31
 
     material_version = '1.2.1'
-    kotlin_version=  '1.4.10'
+
     //AndroidX
     core_version = '1.5.0'
     appcompat_version = '1.1.0'
@@ -16,6 +16,13 @@ ext {
     constraintlayout_version = '2.0.4'
 
     // App dependencies
+    glide_version  = '4.12.0'
+    retrofit2_version = '2.9.0'
+    rxjava_version = '2.2.8'
+    rxandroid_version = '2.1.1'
+    okhttp3_version = '3.12.2'
+    gson_version = '2.8.5'
+    baserecycleviewhelper_version = '2.9.34'
 
     // lib dependencies
 
@@ -26,12 +33,15 @@ ext {
 
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
+    ext.kotlin_version=  '1.4.10'
     repositories {
+        maven { url 'https://jitpack.io' }
         google()
         mavenCentral()
     }
     dependencies {
         classpath "com.android.tools.build:gradle:7.0.3"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files

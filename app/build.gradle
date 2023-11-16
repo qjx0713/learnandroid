@@ -1,5 +1,7 @@
 plugins {
     id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
 }
 
 android {
@@ -49,5 +51,28 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     //原生结束
 
+    //glide
+    implementation "com.github.bumptech.glide:glide:$rootProject.ext.glide_version"
+
+    //retrofit2开始
+    implementation "com.squareup.retrofit2:retrofit:$rootProject.ext.retrofit2_version"
+    implementation "com.squareup.retrofit2:converter-gson:$rootProject.ext.retrofit2_version"
+    implementation "com.squareup.retrofit2:adapter-rxjava2:$rootProject.ext.retrofit2_version"
+    implementation "com.squareup.retrofit2:converter-scalars:$rootProject.ext.retrofit2_version"
+    //retrofit2结束
+
+    //rxjava开始
+    implementation "io.reactivex.rxjava2:rxjava:$rootProject.ext.rxjava_version"
+    implementation "io.reactivex.rxjava2:rxandroid:$rootProject.ext.rxandroid_version"
+    //rxjava结束
+    //okhttp3
+    implementation "com.squareup.okhttp3:okhttp:$rootProject.ext.okhttp3_version"
+    implementation "com.squareup.okhttp3:logging-interceptor:$rootProject.ext.okhttp3_version"
+    //gson
+    implementation "com.google.code.gson:gson:$rootProject.ext.gson_version"
+    //BaseRecyclerViewAdapterHelper
+    implementation "com.github.CymChad:BaseRecyclerViewAdapterHelper:$rootProject.ext.baserecycleviewhelper_version"
+
     implementation project(":nativelib")
+    implementation project(":lib_base")
 }

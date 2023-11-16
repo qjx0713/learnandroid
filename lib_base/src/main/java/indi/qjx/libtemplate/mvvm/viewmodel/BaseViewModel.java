@@ -2,7 +2,7 @@ package indi.qjx.libtemplate.mvvm.viewmodel;
 
 import androidx.databinding.Observable;
 import androidx.databinding.PropertyChangeRegistry;
-import androidx.lifecycle.DefaultLifecycleObserver;
+import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -12,7 +12,7 @@ import indi.qjx.libtemplate.mvvm.config.LoadState;
 /**
  * ViewModel 基类
  */
-public class BaseViewModel extends ViewModel implements DefaultLifecycleObserver, Observable {
+public class BaseViewModel extends ViewModel implements LifecycleObserver, Observable {
 
     /**
      * 加载状态

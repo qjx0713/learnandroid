@@ -10,14 +10,14 @@ import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.DefaultLifecycleObserver;
+import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
 import java.lang.reflect.ParameterizedType;
 
 
-public abstract class BaseMvvmFragment<VM extends ViewModel & DefaultLifecycleObserver, DB extends ViewDataBinding> extends Fragment {
+public abstract class BaseMvvmFragment<VM extends ViewModel & LifecycleObserver, DB extends ViewDataBinding> extends Fragment {
     protected VM mViewModel;
     protected DB mViewDataBind;
 
