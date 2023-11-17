@@ -73,6 +73,6 @@ dependencies {
     //BaseRecyclerViewAdapterHelper
     implementation "com.github.CymChad:BaseRecyclerViewAdapterHelper:$rootProject.ext.baserecycleviewhelper_version"
 
-    implementation project(":nativelib")
+//    implementation project(":nativelib")
     implementation project(":lib_base")
 }

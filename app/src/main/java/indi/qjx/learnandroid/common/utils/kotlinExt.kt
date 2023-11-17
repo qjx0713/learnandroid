@@ -1,4 +1,4 @@
-package indi.qjx.learnandroid.utils
+package indi.qjx.learnandroid.common.utils
 
 import android.content.Context
 import android.content.Intent

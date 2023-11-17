@@ -1,6 +1,9 @@
 package indi.qjx.learnandroid;
 
 import android.app.Application;
+import android.util.Log;
+
+import indi.qjx.learnandroid.common.utils.ProcessUtils;
 
 /**
  * author : qjx
@@ -20,5 +23,7 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        String processName = ProcessUtils.getProcessName(android.os.Process.myPid());
+        Log.d(TAG, "onCreate: processName=" + processName);
     }
 }

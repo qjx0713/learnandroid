@@ -1,6 +1,5 @@
-package indi.qjx.learnandroid.adapter
+package indi.qjx.learnandroid.common.adapter
 
-import android.widget.Button
 import com.chad.library.adapter.base.BaseQuickAdapter
 import com.chad.library.adapter.base.BaseViewHolder
 import indi.qjx.learnandroid.R

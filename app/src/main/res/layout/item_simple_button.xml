@@ -8,8 +8,9 @@
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn"
             android:layout_width="match_parent"
-            android:layout_marginHorizontal="30dp"
-            android:layout_height="60dp"
+            android:layout_height="50dp"
+            android:layout_marginHorizontal="15dp"
+            android:clickable="false"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
