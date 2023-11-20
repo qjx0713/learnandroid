@@ -22,6 +22,15 @@ class IPCActivity: BaseMvvmActivity<BaseViewModel, ActivityIpcBinding>() {
         BtnAction("创建新进程") {
             jumpActivity(this, IPCSecondActivity::class.java)
         },
+        BtnAction("使用Messenger 跨进程通信") {
+            jumpActivity(this, MessengerActivity::class.java)
+        },
+        BtnAction("使用AIDL 跨进程通信") {
+            jumpActivity(this, BookManagerActivity::class.java)
+        },
+        BtnAction("使用ContentProvider 跨进程通信") {
+            jumpActivity(this, ProviderActivity::class.java)
+        },
     )
     override fun getLayoutId(): Int {
        return R.layout.activity_ipc

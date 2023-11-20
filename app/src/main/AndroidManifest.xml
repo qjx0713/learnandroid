@@ -2,6 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="indi.qjx.learnandroid">
 
+    <permission
+        android:name="indi.qjx.PROVIDER"
+        android:protectionLevel="normal" />
+
+    <uses-permission android:name="indi.qjx.PROVIDER" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -16,6 +21,23 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Learnandroid">
+        <activity
+            android:name=".ipc.ui.activity.ProviderActivity"
+            android:exported="true" />
+        <activity
+            android:name=".ipc.ui.activity.BookManagerActivity"
+            android:exported="true" />
+
+        <service
+            android:name=".ipc.service.BookManagerService"
+            android:enabled="true"
+            android:exported="true"
+            android:process=":remote" />
+        <service
+            android:name=".ipc.service.MessengerService"
+            android:enabled="true"
+            android:exported="true"
+            android:process=":remote" />
 
         <activity
             android:name=".common.ui.activity.MainActivity"
@@ -26,14 +48,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ipc.ui.activity.IPCActivity"
             android:exported="true" />
         <activity
+            android:name=".ipc.ui.activity.MessengerActivity"
+            android:exported="true" />
+        <activity
             android:name=".ipc.ui.activity.IPCSecondActivity"
             android:exported="true"
-            android:process=":remote"/>
+            android:process=":remote" />
+
+        <provider
+            android:name=".ipc.provider.BookProvider"
+            android:authorities="indi.qjx.learnandroid.ipc.provider"
+            android:permission="indi.qjx.PROVIDER"
+            android:process=":provider" />
     </application>
 
 </manifest>
