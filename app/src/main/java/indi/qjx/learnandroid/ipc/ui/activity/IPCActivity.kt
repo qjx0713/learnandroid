@@ -31,6 +31,12 @@ class IPCActivity: BaseMvvmActivity<BaseViewModel, ActivityIpcBinding>() {
         BtnAction("使用ContentProvider 跨进程通信") {
             jumpActivity(this, ProviderActivity::class.java)
         },
+        BtnAction("使用Socket 跨进程通信") {
+            jumpActivity(this, TCPClientActivity::class.java)
+        },
+        BtnAction("使用BinderPool 跨进程通信") {
+            jumpActivity(this, BinderPoolActivity::class.java)
+        },
     )
     override fun getLayoutId(): Int {
        return R.layout.activity_ipc

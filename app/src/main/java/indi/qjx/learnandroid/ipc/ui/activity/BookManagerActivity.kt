@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.*
+import android.os.IBinder.DeathRecipient
 import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import indi.qjx.learnandroid.R
@@ -47,8 +48,9 @@ class BookManagerActivity : AppCompatActivity() {
     private val mConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             val bookManager: IBookManager = IBookManager.Stub.asInterface(service)
+            mRemoteBookManager = bookManager
             try {
-                mRemoteBookManager = bookManager
+                mRemoteBookManager!!.asBinder().linkToDeath(mDeathRecipient, 0)
                 val list: List<Book> = bookManager.bookList
                 Log.i(TAG, "query book list, list type:" + list.javaClass.canonicalName)
                 Log.i(TAG, "query book list:$list")
@@ -64,6 +66,16 @@ class BookManagerActivity : AppCompatActivity() {
 
         override fun onServiceDisconnected(className: ComponentName) {
             Log.d(TAG, "onServiceDisconnected. tname:" + Thread.currentThread().name)
+        }
+    }
+
+    private val mDeathRecipient: DeathRecipient = object : DeathRecipient {
+        override fun binderDied() {
+            Log.d(TAG, "binder died. tname:" + Thread.currentThread().name)
+            if (mRemoteBookManager == null) return
+            mRemoteBookManager!!.asBinder().unlinkToDeath(this, 0)
+            mRemoteBookManager = null
+            // TODO:这里重新绑定远程Service
         }
     }
 
