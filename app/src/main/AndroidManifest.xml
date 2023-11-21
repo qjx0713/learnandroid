@@ -21,7 +21,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Learnandroid">
-        <!--        首页-->
+
+        <!-- 首页 -->
         <activity
             android:name=".common.ui.activity.MainActivity"
             android:exported="true">
@@ -32,78 +33,87 @@
             </intent-filter>
         </activity>
 
-        <!--        IPC相关开始-->
+        <!-- IPC相关开始 -->
         <activity
             android:name=".ipc.ui.activity.IPCActivity"
             android:exported="true" />
 
-        <!--        创建新进程-->
+        <!-- 创建新进程 -->
         <activity
             android:name=".ipc.ui.activity.IPCSecondActivity"
             android:exported="true"
             android:process=":remote" />
 
-        <!--        使用Messenger IPC-->
+        <!-- 使用Messenger IPC -->
         <activity
             android:name=".ipc.ui.activity.MessengerActivity"
             android:exported="true" />
 
-        <!--        使用Messenger IPC远程服务-->
+        <!-- 使用Messenger IPC远程服务 -->
         <service
             android:name=".ipc.service.MessengerService"
             android:enabled="true"
             android:exported="true"
             android:process=":remote" />
 
-        <!--        使用AIDL IPC-->
+        <!-- 使用AIDL IPC -->
         <activity
             android:name=".ipc.ui.activity.BookManagerActivity"
             android:exported="true" />
 
-        <!--        使用AIDL IPC远程服务-->
+        <!-- 使用AIDL IPC远程服务 -->
         <service
             android:name=".ipc.service.BookManagerService"
             android:enabled="true"
             android:exported="true"
             android:process=":remote" />
 
-        <!--        使用Provider IPC-->
+        <!-- 使用Provider IPC -->
         <activity
             android:name=".ipc.ui.activity.ProviderActivity"
             android:exported="true" />
 
-        <!--        使用Provider IPC Provider -->
+        <!-- 使用Provider IPC Provider -->
         <provider
             android:name=".ipc.provider.BookProvider"
             android:authorities="indi.qjx.learnandroid.ipc.provider"
             android:permission="indi.qjx.PROVIDER"
             android:process=":provider" />
 
-        <!--        使用Socket IPC远程服务-->
+        <!-- 使用Socket IPC远程服务 -->
         <service
             android:name=".ipc.service.TCPServerService"
             android:enabled="true"
             android:exported="true"
-            android:process=":remote"/>
-
-        <!--        使用Socket IPC-->
+            android:process=":remote" /> <!-- 使用Socket IPC -->
         <activity
             android:name=".ipc.ui.activity.TCPClientActivity"
             android:exported="true" />
 
-        <!--        使用BinderPool IPC-->
+        <!-- 使用BinderPool IPC -->
         <activity
             android:name=".ipc.ui.activity.BinderPoolActivity"
             android:exported="true" />
 
-        <!--        使用BinderPool service-->
+        <!-- 使用BinderPool service -->
         <service
             android:name=".ipc.service.BinderPoolService"
             android:enabled="true"
             android:exported="true"
-            android:process=":remote"/>
-        <!--        IPC相关结束-->
+            android:process=":remote" />
+        <!-- IPC相关结束 -->
 
+        <!-- View相关开始 -->
+        <activity
+            android:name=".view.ui.activity.ViewActivity"
+            android:exported="true" />
+
+        <!-- View基础 -->
+        <activity
+            android:name=".view.ui.activity.ViewSimpleActivity"
+            android:exported="true" />
+
+        <!-- View相关结束 -->
     </application>
 
 </manifest>
