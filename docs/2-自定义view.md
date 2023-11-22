@@ -126,3 +126,72 @@ View动画是对 View 的影像做操作，它并不能真正改变View的位置
     //或者mButton1.setLayoutParams(params);
 
 ## View事件分发
+
+    public boolean dispatchTouchEvent(MotionEvent ev)
+
+用来进行事件的分发。如果事件能够传递给当前 View，那么此方法一定会被调用，返回结果受当前 View的onTouchEvent 和下级 View的dispatchTouchEvent方法的影响，表示是否消耗当前事件。
+
+    public boolean onInterceptTouchEvent(MotionEvent event)
+
+在上述方法内部调用，用来判断是否拦截某个事件，如果当前 View 拦截了某个事件那么在同一个事件序列当中，此方法不会被再次调用，返回结果表示是否拦截当前事件。
+
+    public boolean onTouchEvent(MotionEvent event)
+
+在dispatchTouchEvent 方法中调用，用来处理点击事件，返回结果表示是否消耗当前事件，如果不消耗，则在同一个事件序列中，当前 View 无法再次接收到事件。
+
+其实它们的关系可以用如下伪代码表示:
+
+    public boolean dispatchTouchEvent(MotionEvent ev){
+		boolean consume = false;
+	    if (onInterceptTouchEvent(ev)) {
+		    consume = onTouchEvent(ev);
+		} else {
+		    consume = child.dispatchTouchEvent(ev);
+		}
+	    return consume;
+	}
+
+对于一个根 ViewGroup 来说，点击事件产生后，首先会传递给它,这时它的 dispatchTouchEvent就会被调用,如果这个ViewGroup 的onInterceptTouchEvent方法返回true就表示它要拦截当前事件，接着事件就会交给这个 ViewGroup 处理，即它的onTouchEvent方法就会被调用;如果这个 ViewGroup 的onInterceptTouchEvent方法返回false就表示它不拦截当前事件，这时当前事件就会继续传递给它的子元素，接着子元素的dispatchTouchEvent 方法就会被调用，如此反复直到事件被最终处理。
+
+
+当一个 View 需要处理事件时，如果它设置了 OnTouchListener，那么OnTouchListener中的onTouch 方法会被回调。这时事件如何处理还要看 onTouch 的返回值，如果返回false则当前 View的onTouchEvent 方法会被调用;如果返回 true，那么onTouchEvent 方法将不会被调用。由此可见，给 View 设置的 OnTouchListener，其优先级比onTouchEvent 要高。在onTouchEvent 方法中，如果当前设置的有 OnClickListener，那么它的 onClick 方法会被调用。可以看出，平时我们常用的 OnClickListener，其优先级最低，即处于事件传递的尾端。
+
+
+当一个点击事件产生后，它的传递过程遵循如下顺序:Activity-> Window->View，即事件总是先传递给Activity，Activity再传递给 Window，最后 Window 再传递给顶级 View。顶级 View 接收到事件后，就会按照事件分发机制去分发事件。考虑一种情况，如果一个View的onTouchEvent返回false，那么它的父容器的onTouchEvent 将会被调用，依此类推如果所有的元素都不处理这个事件,那么这个事件将会最终传递给Activity处理，即Activity的onTouchEvent 方法会被调用。这个过程其实也很好理解，我们可以换一种思路，假如点击事件是一个难题，这个难题最终被上级领导分给了一个程序员去处理(这是事件分发过程)，结果这个程序员搞不定 (onTouchEvent 返回了 false)，现在该怎么办呢?难题必须要解决，那只能交给水平更高的上级解决(上级的onTouchEvent 被调用)，如果上级再搞不定，那只能交给上级的上级去解决，就这样将难题一层层地向上抛，这是公司内部一种很常见的处理问题的过程。从这个角度来看，View 的事件传递过程还是很贴近现实的，毕竞程序员也生活在现实中。
+
+关于事件传递的机制，这里给出一些结论，根据这些结论可以更好地理解整个传递机制，如下所示。
+
+(1)同一个事件序列是指从手指接触屏幕的那一刻起，到手指离开屏幕的那一刻结束，在这个过程中所产生的一系列事件，这个事件序列以 down 事件开始，中间含有数量不定的move 事件，最终以up 事件结束。
+
+(2)正常情况下，一个事件序列只能被一个 View 拦截且消耗。这一条的原因可以参考(3)，因为一旦一个元素拦截了某此事件，那么同一个事件序列内的所有事件都会直接交给它处理，因此同一个事件序列中的事件不能分别由两个 View 同时处理，但是通过特殊手段可以做到，比如一个 View 将本该自已处理的事件通过onTouchEvent 强行传递给其他 View处理。
+
+(3)某个 View 一旦决定拦截，那么这一个事件序列都只能由它来处理(如果事件序列能够传递给它的话)，并且它的 onInterceptTouchEvent 不会再被调用。这条也很好理解，就是说当一个 View 决定拦截一个事件后，那么系统会把同一个事件序列内的其他方法都直接交给它来处理，因此就不用再调用这个 View的onInterceptTouchEvent 去询问它是否要拦截了。
+
+(4)某个 View 一旦开始处理事件,如果它不消耗ACTION_DOWN 事件(onTouchEvent返回了 false)，那么同一事件序列中的其他事件都不会再交给它来处理，并且事件将重新交由它的父元素去处理，即父元素的 onTouchEvent 会被调用。意思就是事件一旦交给一个View 处理，那么它就必须消耗掉，否则同一事件序列中剩下的事件就不再交给它来处理了这就好比上级交给程序员一件事，如果这件事没有处理好，短期内上级就不敢再把事情交给这个程序员做了，二者是类似的道理。
+
+(5)如果 View 不消耗除 ACTION_DOWN 以外的其他事件那么这个点击事件会消失此时父元素的 onTouchEvent 并不会被调用，并且当前 View 可以持续收到后续的事件，最终这些消失的点击事件会传递给 Activity 处理。
+
+(6)ViewGroup 默认不拦截任何事件。Android 源码中 ViewGroup 的 onInterceptTouch-Event方法默认返回false。
+
+(7) View 没有 onInterceptTouchEvent 方法，一旦有点击事件传递给它，那么它的onTouchEvent 方法就会被调用。
+
+(8)View的onTouchEvent默认都会消耗事件(返回true),除非它是不可点击的(clickable和longClickable 同时为 false)。View 的 longClickable 属性默认都为 false，clickable 属性要分情况,比如 Button 的clickable 属性默认为 true,而 TextView 的 clickable 属性默认为 false。
+
+(9)View 的enable 属性不影响 onTouchEvent 的默认返回值。哪怕一个 View 是disable状态的，只要它的 clickable 或者 ongClickable 有一个为 true，那么它的 onTouchEvent 就返回true
+
+(10) onClick 会发生的前提是当前 View 是可点击的，并且它收到了 down 和up 的事件。
+
+(11)事件传递过程是由外向内的，即事件总是先传递给父元素，然后再由父元素分发给子 View，通过 requestDisallowInterceptTouchEvent 方法可以在子元素中干预父元素的事件分发过程，但是ACTION_DOWN 事件除外。
+
+## View事件分发
+
+![图片](./image/2-1.png)
+
+### 外部拦截法
+
+所谓外部拦截法是指点击事情都先经过父容器的拦截处理，如果父容器需要此事件就拦截，如果不需要此事件就不拦截，这样就可以解决滑动冲突的问题，这种方法比较符合点击事件的分发机制。外部拦截法需要重写父容器的方法，在内部做相应的拦截即可。
+
+### 内部拦截法
+内部拦截法是指父容器不拦截任何事件，所有的事件都传递给子元素，如果子元素需要此事件就直接消耗掉，否则就交由父容器进行处理，这种方法和 Android 中的事件分发机制不一致，需要配合 requestDisallowInterceptTouchEvent 方法才能正常工作，使用起来较外部拦截法稍显复杂。
+
+除了子元素需要做处理以外，父元素也要默认拦截除了 ACTION_DOWN 以外的其他事件，这样当子元素调用 parent.requestDisallowInterceptTouchEvent(false)方法时，父元素才能继续拦截所需的事件。为什么父容器不能拦截ACTION_DOWN 事件呢?那是因为ACTION_DOWN事件并不受FLAG_DISALLOW_INTERCEPT这个标记位的控制，所以一旦父容器拦截ACTION DOWN事件，那么所有的事件都无法传递到子元素中去，这样内部拦截就无法起作用了。

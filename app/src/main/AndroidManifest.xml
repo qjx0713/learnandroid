@@ -113,6 +113,16 @@
             android:name=".view.ui.activity.ViewSimpleActivity"
             android:exported="true" />
 
+        <!-- 滑动冲突外部拦截 -->
+        <activity
+            android:name=".view.ui.activity.ConflictOutsideActivity"
+            android:exported="true" />
+
+        <!-- 滑动冲突内部拦截 -->
+        <activity
+            android:name=".view.ui.activity.ConflictInsideActivity"
+            android:exported="true" />
+
         <!-- View相关结束 -->
     </application>
 
