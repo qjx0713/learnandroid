@@ -183,7 +183,9 @@ View动画是对 View 的影像做操作，它并不能真正改变View的位置
 
 (11)事件传递过程是由外向内的，即事件总是先传递给父元素，然后再由父元素分发给子 View，通过 requestDisallowInterceptTouchEvent 方法可以在子元素中干预父元素的事件分发过程，但是ACTION_DOWN 事件除外。
 
-## View事件分发
+分析过程可以参考 [https://juejin.cn/post/7168445102984003591](https://juejin.cn/post/7168445102984003591)
+
+## View滑动冲突
 
 ![图片](./image/2-1.png)
 
@@ -195,3 +197,52 @@ View动画是对 View 的影像做操作，它并不能真正改变View的位置
 内部拦截法是指父容器不拦截任何事件，所有的事件都传递给子元素，如果子元素需要此事件就直接消耗掉，否则就交由父容器进行处理，这种方法和 Android 中的事件分发机制不一致，需要配合 requestDisallowInterceptTouchEvent 方法才能正常工作，使用起来较外部拦截法稍显复杂。
 
 除了子元素需要做处理以外，父元素也要默认拦截除了 ACTION_DOWN 以外的其他事件，这样当子元素调用 parent.requestDisallowInterceptTouchEvent(false)方法时，父元素才能继续拦截所需的事件。为什么父容器不能拦截ACTION_DOWN 事件呢?那是因为ACTION_DOWN事件并不受FLAG_DISALLOW_INTERCEPT这个标记位的控制，所以一旦父容器拦截ACTION DOWN事件，那么所有的事件都无法传递到子元素中去，这样内部拦截就无法起作用了。
+
+## View工作原理
+
+### ViewRoot和DecorView
+
+ViewRoot对应于ViewRootImpl 类，它是连接WindowManager和DecorView 的纽带。View 的三大流程均是通过ViewRoot 来完成的。在ActivityThread 中，当Activity 对象被创建完毕后，会将 DecorView 添加到 Window 中，同时会创建 ViewRootImpl 对象，并将ViewRootImpl对象和DecorView 建立关联。
+
+View 的绘制流程是从 ViewRoot 的 performTraversals 方法开始的，它经过measure、layout和draw三个过程才能最终将一个 View绘制出来，其中measure 用来测量 View的宽和高,layout 用来确定 View 在父容器中的放置位置，而draw 则负责将 View 绘制在屏幕上。
+
+performTraversals 会依次调用 performMeasure、performLayout 和performDraw三个方法，这三个方法分别完成顶级 View的measure、layout和draw这三大流程其中在performMeasure 中会调用measure方法在measure方法中又会调用onMeasure方法，在onMeasure 方法中则会对所有的子元素进行measure过程，这个时候measure流程就从父容器传递到子元素中了，这样就完成了一次 measure 过程。接着子元素会重复父容器的measure过程，如此反复就完成了整个 View 树的遍历。同理，performLayout和performDraw的传递流程和performMeasure 是类似的，唯一不同的是，performDraw的传递过程是在draw 方法中通过dispatchDraw 来实现的，不过这并没有本质区别。
+
+measure过程决定了 View 的宽/高，Measure完成以后，可以通过getMeasuredWidth和getMeasuredHeight 方法来获取到 View 测量后的宽/高，在几乎所有的情况下它都等同于View 最终的宽/高，但是特殊情况除外，这点在本章后面会进行说明。Layout 过程决定了View 的四个顶点的坐标和实际的 View 的宽/高，完成以后，可以通过 getTop、getBottom、getLeft和getRight 来拿到 View 的四个顶点的位置，并可以通过 getWidth和getHeight方法来拿到View 的最终宽/高。Draw 过程则决定了 View 的显示只有draw 方法完成以后 View的内容才能呈现在屏幕上。
+
+DecorView 作为顶级 View，一般情况下它内部会包含一个竖直方向的LinearLayout，在这个LinearLayout 里面有上下两个部分(具体情况和Android 版本及主题有关)，上面是标题栏，下面是内容栏。在Activity 中我们通过setContentView 所设置的布局文件其实就是被加到内容栏之中的，而内容栏的id是content，因此可以理解为 Activity指定布局的方法不叫setview而叫 setContentView,因为我们的布局的确加到了id为content的 FrameLayout 中。如何得到 content 呢?可以这样: ViewGroup content= findViewByld(R.android.id.content)。如何得到我们设置的 View 呢?可以这样:content.getChildAt(0)。同时，通过源码我们可以知道，DecorView 其实是一个FrameLavout，View 层的事件都先经过DecorView，然后才传递给我们的View。
+
+![图片](./image/2-2.png)
+
+### MeasureSpec
+
+MeasureSpec代表一个32位int 值，高2位代表SpecMode，低30位代表 SpecSize,SpecMode 是指测量模式，而 SpecSize 是指在某种测量模式下的规格大小。
+
+MeasureSpec 通过将SpecMode和SpecSize打包成一个int值来避免过多的对象内存分配，为了方便操作，其提供了打包和解包方法。SpecMode 和 SpecSize 也是一个int值，组SpecMode 和SpecSize可以打包为一个MeasureSpec,而一个MeasureSpec 可以通过解包的形式来得出其原始的 SpecMode 和 SpecSize,需要注意的是这里提到的 MeasureSpec 是指MeasureSpec所代表的int值，而并非MeasureSpec本身。
+
+SpecMode 有三类，每一类都表示特殊的含义，如下所示。
+
+**UNSPECIFIED**
+
+父容器不对 View 有任何限制，要多大给多大，这种情况一般用于系统内部，表示一种测量的状态。
+
+**EXACTLY**
+
+父容器已经检测出View所需要的精确大小，这个时候View的最终大小就是SpecSize所指定的值。它对应于LayoutParams中的match_parent和具体的数值这两种模式
+
+**AT MOST**
+
+父容器指定了一个可用大小即 SpecSize， View 的大小不能大于这个值，具体是什么值要看不同View的具体实现。它对应于LayoutParams中的wrap_content。
+
+
+### MeasureSpec和LayoutParams 的对应关系
+
+在 View测量的时候，系统会将 LayoutParams 在父容器的约束下转换成对应的 MeasureSpec，然后再根据这个MeasureSpec 来确定 View 测量后的宽/高。需要注意的是，MeasureSpec 不是唯由LayoutParams决定的,LayoutParams需要和父容器一起才能决定View的MeasureSpec。另外，对于顶级 View(即 DecorView)和普通 View 来说,MeasureSpec 的转换过程略有不同。对于 DecorView，其 MeasureSpec 由窗口的尺寸和其自身的LayoutParams来共同确定;对于普通 View，其MeasureSpec 由父容器的MeasureSpec和自身的LayoutParams来共同决定，MeasureSpec 一旦确定后， onMeasure中就可以确定View的测量宽/高。
+
+当DecorView的LayoutParams是match_parent时，测量模式是EXACTLY，值是Window大小；当DecorView的LayoutParams是wrap_content时,测量模式是AT_MOST，值是window大小。
+
+| 子View布局\父View Mode | EXACTLY | AT_MOST | UNSPECIFIE |
+| ------ | ----------- | ----------- | ----------- |
+| Ddp/dx具体值 | EXACTLY+childSize | EXACTLY+childSize | EXACTLY+childSize |
+| match_parent | EXACTLY+parentSize | AT_MOST+parentSize | UNSPECIFIIED+0 |
+| wrap_conent | AT_MOST+parentSize | AT_MOST+parentSize | UNSPECIFIIED+0 |
