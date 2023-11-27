@@ -103,6 +103,17 @@
             android:process=":remote" />
         <!-- IPC相关结束 -->
 
+        <!-- JetPack相关开始 -->
+        <activity
+            android:name=".jetpack.ui.activity.JetPackActivity"
+            android:exported="true" />
+
+        <activity
+            android:name=".jetpack.ui.activity.LiveDataActivity"
+            android:exported="true" />
+
+        <!-- JetPack相关结束 -->
+
         <!-- View相关开始 -->
         <activity
             android:name=".view.ui.activity.ViewActivity"
