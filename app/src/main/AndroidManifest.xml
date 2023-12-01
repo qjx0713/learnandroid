@@ -112,6 +112,10 @@
             android:name=".jetpack.ui.activity.LiveDataActivity"
             android:exported="true" />
 
+        <activity
+            android:name=".jetpack.ui.activity.WorkManagerActivity"
+            android:exported="true" />
+
         <!-- JetPack相关结束 -->
 
         <!-- View相关开始 -->
@@ -135,6 +139,19 @@
             android:exported="true" />
 
         <!-- View相关结束 -->
+
+        <!-- database相关开始 -->
+        <activity
+            android:name=".database.ui.activity.DatabaseActivity"
+            android:exported="true" />
+
+        <activity
+            android:name=".database.ui.activity.SQLiteActivity"
+            android:exported="true" />
+        <activity
+            android:name=".database.ui.activity.RoomActivity"
+            android:exported="true" />
+        <!-- database相关结束 -->
     </application>
 
 </manifest>

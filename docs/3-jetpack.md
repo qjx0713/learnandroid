@@ -327,3 +327,115 @@ LiveData 的数据重放问题也叫作数据倒灌、粘性事件，核心源�
 
 当 LiveData 作为一个状态使用时，在注册新观察者时重放已有状态是合理的；
 当 LiveData 作为一个事件使用时，在注册新观察者时重放已经分发过的事件就是不合理的。
+
+## WorkManager
+
+Android的后台机制是一个很复杂的话题，在很早之前，Android系统的后台功能是非常开放的，Service的优先级也很高，仅次于Activity，那个时候可以在Service中做很多事情。但由于后台功能太过于开放，每个应用都想无限地占用后台资源，导致手机的内存越来越紧张，耗电越来越快，也变得越来越卡。为了解决这些情况，基本上Android系统每发布一个新版本，后台权限都会被进一步收紧。
+我印象中与后台相关的API变更大概有这些：从4.4系统开始AlarmManager的触发时间由原来的精准变为不精准，5.0系统中加入了JobScheduler来处理后台任务，6.0系统中引入了Doze和App Standby模式用于降低手机被后台唤醒的频率，从8.0系统开始直接禁用了Service的后台功能，只允许使用前台Service。当然，还有许许多多小细节的修改。这么频繁的功能和API变更，让开发者就很难受了，到底该如何编写后台代码才能保证应用程序在不同系统版本上的兼容性呢？为了解决这个问题，Google推出了WorkManager组件。WorkManager很适合用于处理一些要求定时执行的任务，它可以根据操作系统的版本自动选择底层是使用AlarmManager实现还是JobScheduler实现，从而降低了我们的使用成本。另外，它还支持周期性任务、链式任务处理等功能，是一个非常强大的工具。
+不过，我们还得先明确一件事情：WorkManager和Service并不相同，也没有直接的联系。Service是Android系统的四大组件之一，它在没有被销毁的情况下是一直保持在后台运行的。而WorkManager只是一个处理定时任务的工具，它可以保证即使在应用退出甚至手机重启的情况下，之前注册的任务仍然将会得到执行，因此WorkManager很适合用于执行一些定期和服务器进行交互的任务，比如周期性地同步数据，等等。
+另外，使用WorkManager注册的周期性任务不能保证一定会准时执行，这并不是bug，而是系统为了减少电量消耗，可能会将触发时间临近的几个任务放在一起执行，这样可以大幅度地减少CPU被唤醒的次数，从而有效延长电池的使用时间。
+
+### WorkManager的基本用法
+要想使用WorkManager，需要先在app/build.gradle文件中添加如下的依赖：
+```
+dependencies {
+ ...
+ implementation "androidx.work:work-runtime:2.2.0"
+}
+```
+WorkManager的基本用法其实非常简单，主要分为以下3步：
+1. 定义一个后台任务，并实现具体的任务逻辑；
+2. 配置该后台任务的运行条件和约束信息，并构建后台任务请求；
+3. 将该后台任务请求传入WorkManager的enqueue()方法中，系统会在合适的时间运行。
+
+第一步要定义一个后台任务，这里创建一个SimpleWorker类，代码如下所示：
+```
+class SimpleWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
+
+    override fun doWork(): Result {
+        Log.d("SimpleWorker", "do work in SimpleWorker")
+        return Result.success()
+    }
+
+}
+```
+后台任务的写法非常固定，也很好理解。首先每一个后台任务都必须继承自Worker类，并调用它唯一的构造函数。然后重写父类中的doWork()方法，在这个方法中编写具体的后台任务逻辑即可。
+doWork()方法不会运行在主线程当中，因此你可以放心地在这里执行耗时逻辑，不过这里简单起见只是打印了一行日志。另外，doWork()方法要求返回一个Result对象，用于表示任务的运行结果，成功就返回Result.success()，失败就返回Result.failure()。除此之外，还有一个Result.retry()方法，它其实也代表着失败，只是可以结合WorkRequest.Builder的setBackoffCriteria()方法来重新执行任务
+
+第二步，配置该后台任务的运行条件和约束信息。
+这一步其实也是最复杂的一步，因为可配置的内容非常多，不过目前我们还只是学习WorkManager的基本用法，因此只进行最基本的配置就可以了，代码如下所示：
+```
+val request = OneTimeWorkRequest.Builder(SimpleWorker::class.java).build()
+```
+可以看到，只需要把刚才创建的后台任务所对应的Class对象传入OneTimeWorkRequest.Builder的构造函数中，然后调用build()方法即可完成构建。OneTimeWorkRequest.Builder是WorkRequest.Builder的子类，用于构建单次运行的后台任务请求。WorkRequest.Builder还有另外一个子类PeriodicWorkRequest.Builder，可用于构建周期性运行的后台任务请求，但是为了降低设备性能消耗，PeriodicWorkRequest.Builder构造函数中传入的运行周期间隔不能短于15分钟，示例代码如下：
+```
+val request = PeriodicWorkRequest.Builder(SimpleWorker::class.java, 15,TimeUnit.MINUTES).build()
+```
+最后一步，将构建出的后台任务请求传入WorkManager的enqueue()方法中，系统就会在合
+适的时间去运行了：
+```
+WorkManager.getInstance(context).enqueue(request)
+```
+
+### 使用WorkManager处理复杂的任务
+让后台任务在指定的延迟时间后运行，只需要借助setInitialDelay()方法就可以了，代码如下所示：
+```
+val request = OneTimeWorkRequest.Builder(SimpleWorker::class.java)
+                        .setInitialDelay(5, TimeUnit.MINUTES)
+                        .build()
+ ```
+ 说给后台任务请求添加标签：
+ ```
+ val request = OneTimeWorkRequest.Builder(SimpleWorker::class.java)
+ ...
+ .addTag("simple")
+ .build()
+ ```
+那么添加了标签有什么好处呢？最主要的一个功能就是我们可以通过标签来取消后台任务请求：
+```
+WorkManager.getInstance(this).cancelAllWorkByTag("simple")
+```
+当然，即使没有标签，也可以通过id来取消后台任务请求：
+```
+WorkManager.getInstance(this).cancelWorkById(request.id)
+```
+但是，使用id只能取消单个后台任务请求，而使用标签的话，则可以将同一标签名的所有后台任务请求全部取消，这个功能在逻辑复杂的场景下尤其有用。
+除此之外，我们也可以使用如下代码来一次性取消所有后台任务请求：
+```
+WorkManager.getInstance(this).cancelAllWork()
+```
+如果后台任务的doWork()方法中返回了Result.retry()，那么是可以结合setBackoffCriteria()方法来重新执行任务的
+```
+val request = OneTimeWorkRequest.Builder(SimpleWorker::class.java)
+ ...
+ .setBackoffCriteria(BackoffPolicy.LINEAR, 10, TimeUnit.SECONDS)
+ .build()
+```
+setBackoffCriteria()方法接收3个参数：第二个和第三个参数用于指定在多久之后重新执行任务，时间最短不能少于10秒钟；第一个参数则用于指定如果任务再次执行失败，下次重试的时间应该以什么样的形式延迟。这其实很好理解，假如任务一直执行失败，不断地重新执行似乎并没有什么意义，只会徒增设备的性能消耗。而随着失败次数的增多，下次重试的时间也应该进行适当的延迟，这才是更加合理的机制。第一个参数的可选值有两种，分别是LINEAR和EXPONENTIAL，前者代表下次重试时间以线性的方式延迟，后者代表下次重试时间以指数的方式延迟。
+Result.success()和Result.failure()又有什么作用？这两个返回值其实就是用于通知任务运行结果的，我们可以使用如下代码对后台任务的运行结果进行监听：
+```
+WorkManager.getInstance(this)
+    .getWorkInfoByIdLiveData(request.id)
+    .observe(this) { workInfo ->
+        if (workInfo.state == WorkInfo.State.SUCCEEDED) {
+            Log.d("MainActivity", "do work succeeded")
+        } else if (workInfo.state == WorkInfo.State.FAILED) {
+            Log.d("MainActivity", "do work failed")
+        }
+ }
+ ```
+这里调用了getWorkInfoByIdLiveData()方法，并传入后台任务请求的id，会返回一个LiveData对象。然后我们就可以调用LiveData对象的observe()方法来观察数据变化了，以此监听后台任务的运行结果。另外，你也可以调用getWorkInfosByTagLiveData()方法。
+
+假设这里定义了3个独立的后台任务：同步数据、压缩数据和上传数据。现在我们想要实现先同步、再压缩、最后上传的功能，就可以借助链式任务来实现，代码示例如下：
+```
+val sync = ...
+val compress = ...
+val upload = ...
+WorkManager.getInstance(this)
+ .beginWith(sync)
+ .then(compress)
+ .then(upload)
+ .enqueue()
+```
+这段代码还是比较好理解的，相信你一看就能懂。beginWith()方法用于开启一个链式任务，至于后面要接上什么样的后台任务，只需要使用then()方法来连接即可。另外WorkManager还要求，必须在前一个后台任务运行成功之后，下一个后台任务才会运行。也就是说，如果某个后台任务运行失败，或者被取消了，那么接下来的后台任务就都得不到运行了。
+前面所介绍的WorkManager的所有功能，在国产手机上都有可能得不到正确的运行。这是因为绝大多数的国产手机厂商在进行Android系统定制的时候会增加一个一键关闭的功能，允许用户一键杀死所有非白名单的应用程序。而被杀死的应用程序既无法接收广播，也无法运行WorkManager的后台任务。这个功能虽然与Android原生系统的设计理念并不相符，但是我们也没有什么解决办法。或许就是因为有太多恶意应用总是想要无限占用后台，国产手机厂商才增加了这个功能吧。因此，这里给你的建议就是，WorkManager可以用，但是千万别依赖它去实现什么核心功能，因为它在国产手机上可能会非常不稳定。

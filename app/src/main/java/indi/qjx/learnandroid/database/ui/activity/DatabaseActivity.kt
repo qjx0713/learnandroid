@@ -1,10 +1,10 @@
-package indi.qjx.learnandroid.jetpack.ui.activity
+package indi.qjx.learnandroid.database.ui.activity
 
 import androidx.recyclerview.widget.LinearLayoutManager
 import indi.qjx.learnandroid.R
 import indi.qjx.learnandroid.common.adapter.SimpleBtnAdapter
 import indi.qjx.learnandroid.common.utils.jumpActivity
-import indi.qjx.learnandroid.databinding.ActivityJetpackBinding
+import indi.qjx.learnandroid.databinding.ActivityDatabaseBinding
 import indi.qjx.learnandroid.model.BtnAction
 import indi.qjx.libtemplate.mvvm.BaseMvvmActivity
 import indi.qjx.libtemplate.mvvm.viewmodel.BaseViewModel
@@ -12,24 +12,24 @@ import indi.qjx.libtemplate.mvvm.viewmodel.BaseViewModel
 /**
  *     author : qjx
  *     e-mail : qianjx1@chinatelecom.cn
- *     time   : 2023/11/27
+ *     time   : 2023/12/01
  */
-class JetPackActivity : BaseMvvmActivity<BaseViewModel, ActivityJetpackBinding>() {
+class DatabaseActivity : BaseMvvmActivity<BaseViewModel, ActivityDatabaseBinding>() {
 
     private val TAG = this::class.java.simpleName
 
     private val functions = listOf<BtnAction>(
-        BtnAction("LiveData使用") {
-            jumpActivity(this, LiveDataActivity::class.java)
+        BtnAction("SQLite数据库") {
+            jumpActivity(this, SQLiteActivity::class.java)
         },
-        BtnAction("WorkManager使用") {
-            jumpActivity(this, WorkManagerActivity::class.java)
+        BtnAction("Room数据库") {
+            jumpActivity(this, RoomActivity::class.java)
         },
 
 
         )
     override fun getLayoutId(): Int {
-        return R.layout.activity_jetpack
+        return R.layout.activity_database
     }
 
     override fun bindViewModel() {
@@ -43,7 +43,7 @@ class JetPackActivity : BaseMvvmActivity<BaseViewModel, ActivityJetpackBinding>(
         mViewDataBind.recyclerview.apply {
             layoutManager =
                 LinearLayoutManager(
-                    this@JetPackActivity,
+                    this@DatabaseActivity,
                     LinearLayoutManager.VERTICAL,
                     false
                 )

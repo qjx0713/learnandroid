@@ -7,6 +7,7 @@ import indi.qjx.learnandroid.databinding.ActivityMainBinding
 import indi.qjx.learnandroid.model.BtnAction
 import indi.qjx.learnandroid.ipc.ui.activity.IPCActivity
 import indi.qjx.learnandroid.common.utils.jumpActivity
+import indi.qjx.learnandroid.database.ui.activity.DatabaseActivity
 import indi.qjx.learnandroid.jetpack.ui.activity.JetPackActivity
 import indi.qjx.learnandroid.view.ui.activity.ViewActivity
 import indi.qjx.libtemplate.mvvm.BaseMvvmActivity
@@ -29,6 +30,9 @@ class MainActivity : BaseMvvmActivity<BaseViewModel, ActivityMainBinding>() {
         },
         BtnAction("JetPack相关") {
             jumpActivity(this, JetPackActivity::class.java)
+        },
+        BtnAction("Database相关") {
+            jumpActivity(this, DatabaseActivity::class.java)
         },
     )
 

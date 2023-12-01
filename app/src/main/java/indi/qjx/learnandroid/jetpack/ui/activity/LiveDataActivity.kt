@@ -1,6 +1,7 @@
 package indi.qjx.learnandroid.jetpack.ui.activity
 
 import android.util.Log
+import androidx.lifecycle.*
 import indi.qjx.learnandroid.R
 import indi.qjx.learnandroid.databinding.ActivityLivedataBinding
 import indi.qjx.learnandroid.jetpack.viewmodel.LiveDataVM
@@ -32,6 +33,7 @@ class LiveDataActivity  : BaseMvvmActivity<LiveDataVM, ActivityLivedataBinding>(
         mViewDataBind.add.setOnClickListener {
             mViewModel.add()
 //            mViewModel.reNotify()
+
         }
         mViewModel.data.observe(this, {
             GlobalScope.launch {

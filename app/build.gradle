@@ -15,6 +15,13 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        //room 数据库配置
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
     }
 
     buildTypes {
@@ -49,6 +56,10 @@ dependencies {
     implementation "androidx.fragment:fragment-ktx:$rootProject.ext.fragment_version"
     implementation "androidx.constraintlayout:constraintlayout:$rootProject.ext.constraintlayout_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+
+    implementation "androidx.room:room-runtime:$rootProject.ext.room_version"
+    kapt "androidx.room:room-compiler:$rootProject.ext.room_version"
+    implementation "androidx.work:work-runtime:$rootProject.ext.workmanager_version"
     //原生结束
 
     //glide
