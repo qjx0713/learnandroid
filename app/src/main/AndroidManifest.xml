@@ -78,6 +78,7 @@
             android:name=".ipc.provider.BookProvider"
             android:authorities="indi.qjx.learnandroid.ipc.provider"
             android:permission="indi.qjx.PROVIDER"
+            android:exported="true"
             android:process=":provider" />
 
         <!-- 使用Socket IPC远程服务 -->
@@ -152,6 +153,10 @@
             android:name=".database.ui.activity.RoomActivity"
             android:exported="true" />
         <!-- database相关结束 -->
+
+        <activity
+            android:name=".flow.ui.activity.FlowActivity"
+            android:exported="true" />
     </application>
 
 </manifest>
