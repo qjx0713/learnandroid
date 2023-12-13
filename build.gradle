@@ -2,7 +2,7 @@ ext {
     // Sdk and tools
     compileSdkVersion = 31
     minSdkVersion = 21
-    targetSdkVersion = 31
+    targetSdkVersion = 30
 
     material_version = '1.2.1'
 

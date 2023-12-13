@@ -1,32 +1,44 @@
-package indi.qjx.libtemplate.mvvm;
+package indi.qjx.base.mvvm;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-
-
 
 import java.lang.reflect.ParameterizedType;
 
-import indi.qjx.libtemplate.mvvm.viewmodel.BaseViewModel;
 
-
-public abstract class BaseMvvmActivity<VM extends BaseViewModel, DB extends ViewDataBinding> extends AppCompatActivity {
+public abstract class BaseMvvmFragment<VM extends ViewModel & LifecycleObserver, DB extends ViewDataBinding> extends Fragment {
     protected VM mViewModel;
     protected DB mViewDataBind;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(getLayoutId());
+        Bundle args = getArguments();
+        if (args != null) {
+            handleArguments(args);
+        }
+    }
 
-        mViewDataBind = DataBindingUtil.setContentView(this, getLayoutId());
-        // 让 LiveData 和 xml 可以双向绑定
-        mViewDataBind.setLifecycleOwner(this);
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        mViewDataBind = DataBindingUtil.inflate(inflater, getLayoutId(), container, false);
 
         initCommonView();
         initViewModel();
@@ -34,14 +46,25 @@ public abstract class BaseMvvmActivity<VM extends BaseViewModel, DB extends View
 
         init();
 
-        // 让 ViewModel 可以感知 Activity 的生命周期
+        // 让 ViewModel 可以感知 Fragment 的生命周期
         if (mViewModel != null) {
             getLifecycle().addObserver(mViewModel);
         }
+
+        return mViewDataBind.getRoot();
     }
 
     /**
-     * 当前页面的布局资源ID
+     * 处理参数
+     *
+     * @param args 参数容器
+     */
+    protected void handleArguments(Bundle args) {
+
+    }
+
+    /**
+     * 获取当前页面的布局资源ID
      *
      * @return 布局资源ID
      */
@@ -72,5 +95,4 @@ public abstract class BaseMvvmActivity<VM extends BaseViewModel, DB extends View
      * 初始化
      */
     protected abstract void init();
-
 }

@@ -196,6 +196,8 @@ View动画是对 View 的影像做操作，它并不能真正改变View的位置
 ### 内部拦截法
 内部拦截法是指父容器不拦截任何事件，所有的事件都传递给子元素，如果子元素需要此事件就直接消耗掉，否则就交由父容器进行处理，这种方法和 Android 中的事件分发机制不一致，需要配合 requestDisallowInterceptTouchEvent 方法才能正常工作，使用起来较外部拦截法稍显复杂。
 
+当子类不想让其父类/祖先ViewGroup.onInterceptTouchEvent(MotionEvent)方法执行时，可以调用requestDisallowInterceptTouchEvent()，一旦标记位被设置为true，后续事件序列中的所有事件都不会调用了父类的onInterceptTouchEvent了。
+
 除了子元素需要做处理以外，父元素也要默认拦截除了 ACTION_DOWN 以外的其他事件，这样当子元素调用 parent.requestDisallowInterceptTouchEvent(false)方法时，父元素才能继续拦截所需的事件。为什么父容器不能拦截ACTION_DOWN 事件呢?那是因为ACTION_DOWN事件并不受FLAG_DISALLOW_INTERCEPT这个标记位的控制，所以一旦父容器拦截ACTION DOWN事件，那么所有的事件都无法传递到子元素中去，这样内部拦截就无法起作用了。
 
 ## View工作原理

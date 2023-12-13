@@ -1,4 +1,4 @@
-package indi.qjx.libtemplate.mvvm.config;
+package indi.qjx.base.mvvm.config;
 
 /**
  * 加载状态

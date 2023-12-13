@@ -4,7 +4,7 @@ import androidx.lifecycle.lifecycleScope
 import indi.qjx.learnandroid.R
 import indi.qjx.learnandroid.databinding.ActivityFlowBinding
 import indi.qjx.learnandroid.flow.viewmodel.FlowVM
-import indi.qjx.libtemplate.mvvm.BaseMvvmActivity
+import indi.qjx.base.mvvm.BaseMvvmActivity
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 

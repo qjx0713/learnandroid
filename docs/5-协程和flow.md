@@ -823,8 +823,54 @@ class MainViewModel : ViewModel() {
 ```
 SharedFlow和StateFlow的用法还是略有不同的。
 首先，MutableSharedFlow是不需要传入初始值参数的。因为非粘性的特性，它本身就不要求观察者在观察的那一刻就能收到消息，所以也没有传入初始值的必要。
+SharedFlow 的构造函数允许我们配置三个参数：
+```
+public fun <T> MutableSharedFlow(
+    // 重放数据个数
+    replay: Int = 0,
+    // 额外缓存容量
+    extraBufferCapacity: Int = 0,
+    // 缓存溢出策略
+    onBufferOverflow: BufferOverflow = BufferOverflow.SUSPEND
+): MutableSharedFlow<T> {
+    val bufferCapacity0 = replay + extraBufferCapacity
+    val bufferCapacity = if (bufferCapacity0 < 0) Int.MAX_VALUE else bufferCapacity0 // coerce to MAX_VALUE on overflow
+    return SharedFlowImpl(replay, bufferCapacity, onBufferOverflow)
+}
+
+public enum class BufferOverflow {
+    // 挂起
+    SUSPEND,
+    // 丢弃最早的一个
+    DROP_OLDEST,
+    // 丢弃最近的一个
+    DROP_LATEST
+}
+```
+
+| 参数 | 描述 |
+|----|----|
+| reply | 重放数据个数，当新订阅者时注册时会重放缓存的 replay 个数据 |
+| extraBufferCapacity | 额外缓存容量，在 replay 之外的额外容量，SharedFlow 的缓存容量 capacity = replay + extraBufferCapacity（实在想不出额外容量有什么用，知道可以告诉我）|
+| onBufferOverflow | 缓存溢出策略，即缓存容量 capacity 满时的处理策略（SUSPEND、DROP_OLDEST、DROP_LAST）|
+
 另外就是，SharedFlow无法像StateFlow那样通过给value变量赋值来发送消息，而是只能像传统Flow那样调用emit函数。而emit函数又是一个挂起函数，所以这里需要调用viewModelScope的launch函数启动一个协程，然后再发送消息。
 当然，其实SharedFlow的用法还远不止这些，我们可以通过一些参数的配置来让SharedFlow在有观察者开始工作之前缓存一定数量的消息，甚至还可以让SharedFlow模拟出StateFlow的效果。
 但是我觉得这些配置会让SharedFlow更难理解，就不打算讲了。还是让它们之间的区别更纯粹一些，通过粘性和非粘性的需求来选择你所需要的那个版本即可。
 
 
+## Channel 通道
+
+在协程的基础能力上使用数据流，除了上文提到到 Flow API，还有一个 Channel API。Channel 是 Kotlin 中实现跨协程数据传输的数据结构，类似于 Java 中的 BlockQueue 阻塞队列。不同之处在于 BlockQueue 会阻塞线程，而 Channel 是挂起线程。Google 的建议 是优先使用 Flow 而不是 Channel，主要原因是 Flow 会更自动地关闭数据流，而一旦 Channel 没有正常关闭，则容易造成资源泄漏。此外，Flow 相较于 Channel 提供了更明确的约束和操作符，更灵活。
+Channel 主要的操作如下：
+
+- 创建 Channel： 通过 Channel(Channel.UNLIMITED) 创建一个 Channel 对象，或者直接使用 produce{} 创建一个生产者协程；
+- 关闭 Channel： Channel#close()；
+- 发送数据： Channel#send() 往 Channel 中发送一个数据，在 Channel 容量不足时 send() 操作会挂起，Channel 默认容量 capacity 是 1；
+- 接收数据： 通过 Channel#receive() 从 Channel 中取出一个数据，或者直接通过 actor 创建一个消费者协程，在 Channel 中数据不足时 receive() 操作会挂起。
+- 广播通道 BroadcastChannel（废弃，使用 SharedFlow）： 普通 Channel 中一个数据只会被一个消费端接收，而 BroadcastChannel 允许多个消费端接收。
+
+
+## MVI 
+- 事件（Event）： 事件是一次有效的，新订阅者不应该收到旧的事件，因此事件数据适合用 SharedFlow(replay=0)；
+- 状态（State）： 状态是可以恢复的，新订阅者允许收到旧的状态数据，因此状态数据适合用 StateFlow。

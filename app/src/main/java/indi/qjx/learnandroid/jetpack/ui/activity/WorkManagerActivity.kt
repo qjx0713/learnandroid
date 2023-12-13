@@ -8,12 +8,8 @@ import indi.qjx.learnandroid.common.adapter.SimpleBtnAdapter
 import indi.qjx.learnandroid.databinding.ActivityWorkmanagerBinding
 import indi.qjx.learnandroid.jetpack.worker.SimpleWorker
 import indi.qjx.learnandroid.model.BtnAction
-import indi.qjx.libtemplate.mvvm.BaseMvvmActivity
-import indi.qjx.libtemplate.mvvm.viewmodel.BaseViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import indi.qjx.base.mvvm.BaseMvvmActivity
+import indi.qjx.base.mvvm.viewmodel.BaseViewModel
 
 /**
  *     author : qjx

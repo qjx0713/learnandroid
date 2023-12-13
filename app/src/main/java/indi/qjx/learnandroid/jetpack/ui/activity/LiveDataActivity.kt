@@ -5,7 +5,7 @@ import androidx.lifecycle.*
 import indi.qjx.learnandroid.R
 import indi.qjx.learnandroid.databinding.ActivityLivedataBinding
 import indi.qjx.learnandroid.jetpack.viewmodel.LiveDataVM
-import indi.qjx.libtemplate.mvvm.BaseMvvmActivity
+import indi.qjx.base.mvvm.BaseMvvmActivity
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

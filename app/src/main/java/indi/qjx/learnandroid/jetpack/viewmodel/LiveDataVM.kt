@@ -2,7 +2,7 @@ package indi.qjx.learnandroid.jetpack.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import indi.qjx.libtemplate.mvvm.viewmodel.BaseViewModel
+import indi.qjx.base.mvvm.viewmodel.BaseViewModel
 
 /**
  *     author : qjx

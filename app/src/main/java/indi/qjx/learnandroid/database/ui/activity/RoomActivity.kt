@@ -9,8 +9,8 @@ import indi.qjx.learnandroid.database.database.AppDatabase
 import indi.qjx.learnandroid.database.entity.User
 import indi.qjx.learnandroid.databinding.ActivityRoomBinding
 import indi.qjx.learnandroid.model.BtnAction
-import indi.qjx.libtemplate.mvvm.BaseMvvmActivity
-import indi.qjx.libtemplate.mvvm.viewmodel.BaseViewModel
+import indi.qjx.base.mvvm.BaseMvvmActivity
+import indi.qjx.base.mvvm.viewmodel.BaseViewModel
 import kotlin.concurrent.thread
 
 /**

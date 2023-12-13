@@ -49,6 +49,7 @@ public class HorizontalScrollViewEx2 extends ViewGroup {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        Log.d(TAG, "onInterceptTouchEvent: " + event.getAction());
         int x = (int) event.getX();
         int y = (int) event.getY();
         int action = event.getAction();

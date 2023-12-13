@@ -1,4 +1,4 @@
-package indi.qjx.libtemplate.mvvm.viewmodel;
+package indi.qjx.base.mvvm.viewmodel;
 
 import androidx.databinding.Observable;
 import androidx.databinding.PropertyChangeRegistry;
@@ -6,7 +6,7 @@ import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import indi.qjx.libtemplate.mvvm.config.LoadState;
+import indi.qjx.base.mvvm.config.LoadState;
 
 
 /**

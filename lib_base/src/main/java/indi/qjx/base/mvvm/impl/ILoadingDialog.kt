@@ -1,4 +1,4 @@
-package indi.qjx.libtemplate.mvvm.impl
+package indi.qjx.base.mvvm.impl
 
 /**
  * 进入页面加载框

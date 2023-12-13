@@ -11,8 +11,8 @@ import indi.qjx.learnandroid.database.ui.activity.DatabaseActivity
 import indi.qjx.learnandroid.flow.ui.activity.FlowActivity
 import indi.qjx.learnandroid.jetpack.ui.activity.JetPackActivity
 import indi.qjx.learnandroid.view.ui.activity.ViewActivity
-import indi.qjx.libtemplate.mvvm.BaseMvvmActivity
-import indi.qjx.libtemplate.mvvm.viewmodel.BaseViewModel
+import indi.qjx.base.mvvm.BaseMvvmActivity
+import indi.qjx.base.mvvm.viewmodel.BaseViewModel
 
 /**
  *     author : qjx

@@ -1,6 +1,6 @@
 package indi.qjx.learnandroid.flow.viewmodel
 
-import indi.qjx.libtemplate.mvvm.viewmodel.BaseViewModel
+import indi.qjx.base.mvvm.viewmodel.BaseViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 

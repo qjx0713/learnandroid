@@ -34,6 +34,7 @@ public class ListViewEx extends ListView {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
+        Log.d(TAG, "dispatchTouchEvent: "  + event.getAction());
         int x = (int) event.getX();
         int y = (int) event.getY();
 

@@ -6,8 +6,8 @@ import indi.qjx.learnandroid.common.adapter.SimpleBtnAdapter
 import indi.qjx.learnandroid.databinding.ActivityIpcBinding
 import indi.qjx.learnandroid.model.BtnAction
 import indi.qjx.learnandroid.common.utils.jumpActivity
-import indi.qjx.libtemplate.mvvm.BaseMvvmActivity
-import indi.qjx.libtemplate.mvvm.viewmodel.BaseViewModel
+import indi.qjx.base.mvvm.BaseMvvmActivity
+import indi.qjx.base.mvvm.viewmodel.BaseViewModel
 
 /**
  *     author : qjx

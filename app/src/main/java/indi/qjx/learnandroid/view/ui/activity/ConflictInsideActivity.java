@@ -27,7 +27,7 @@ import indi.qjx.learnandroid.view.view.ListViewEx;
  * time   : 2023/11/22
  */
 public class ConflictInsideActivity extends AppCompatActivity {
-    private static final String TAG = "DemoActivity_2";
+    private static final String TAG = "ConflictInsideActivity";
 
     private HorizontalScrollViewEx2 mListContainer;
 
