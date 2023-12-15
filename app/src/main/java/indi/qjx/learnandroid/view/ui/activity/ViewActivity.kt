@@ -24,6 +24,9 @@ class ViewActivity : BaseMvvmActivity<BaseViewModel, ActivityViewBinding>() {
         BtnAction("滑动冲突内部拦截") {
             jumpActivity(this, ConflictInsideActivity::class.java)
         },
+        BtnAction("动画") {
+            jumpActivity(this, ViewAnimActivity::class.java)
+        },
 
     )
     override fun getLayoutId(): Int {

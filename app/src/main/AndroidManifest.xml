@@ -139,6 +139,11 @@
             android:name=".view.ui.activity.ConflictInsideActivity"
             android:exported="true" />
 
+        <!-- 动画 -->
+        <activity
+            android:name=".view.ui.activity.ViewAnimActivity"
+            android:exported="true" />
+
         <!-- View相关结束 -->
 
         <!-- database相关开始 -->
