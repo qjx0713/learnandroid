@@ -8,6 +8,7 @@ import indi.qjx.learnandroid.databinding.ActivityJetpackBinding
 import indi.qjx.learnandroid.model.BtnAction
 import indi.qjx.base.mvvm.BaseMvvmActivity
 import indi.qjx.base.mvvm.viewmodel.BaseViewModel
+import indi.qjx.lib_compose.ui.ComposeTestActivity
 
 /**
  *     author : qjx
@@ -24,6 +25,9 @@ class JetPackActivity : BaseMvvmActivity<BaseViewModel, ActivityJetpackBinding>(
         },
         BtnAction("WorkManager使用") {
             jumpActivity(this, WorkManagerActivity::class.java)
+        },
+        BtnAction("Compose") {
+            jumpActivity(this, ComposeTestActivity::class.java)
         },
 
 

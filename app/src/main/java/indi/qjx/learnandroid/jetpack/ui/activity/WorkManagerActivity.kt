@@ -1,15 +1,13 @@
 package indi.qjx.learnandroid.jetpack.ui.activity
 
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.work.OneTimeWorkRequest
-import androidx.work.WorkManager
+import indi.qjx.base.mvvm.BaseMvvmActivity
+import indi.qjx.base.mvvm.viewmodel.BaseViewModel
 import indi.qjx.learnandroid.R
 import indi.qjx.learnandroid.common.adapter.SimpleBtnAdapter
 import indi.qjx.learnandroid.databinding.ActivityWorkmanagerBinding
-import indi.qjx.learnandroid.jetpack.worker.SimpleWorker
 import indi.qjx.learnandroid.model.BtnAction
-import indi.qjx.base.mvvm.BaseMvvmActivity
-import indi.qjx.base.mvvm.viewmodel.BaseViewModel
+
 
 /**
  *     author : qjx
@@ -22,8 +20,8 @@ class WorkManagerActivity : BaseMvvmActivity<BaseViewModel, ActivityWorkmanagerB
 
     private val functions = listOf<BtnAction>(
         BtnAction("WorkManager基本使用") {
-            val request = OneTimeWorkRequest.Builder(SimpleWorker::class.java).build()
-            WorkManager.getInstance(this).enqueue(request)
+/*            val request = OneTimeWorkRequest.Builder(SimpleWorker::class.java).build()
+            WorkManager.getInstance(this).enqueue(request)*/
         },
 
 

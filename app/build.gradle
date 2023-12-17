@@ -59,7 +59,7 @@ dependencies {
 
     implementation "androidx.room:room-runtime:$rootProject.ext.room_version"
     kapt "androidx.room:room-compiler:$rootProject.ext.room_version"
-    implementation "androidx.work:work-runtime:$rootProject.ext.workmanager_version"
+//    implementation "androidx.work:work-runtime:$rootProject.ext.workmanager_version"
     //原生结束
 
     //glide
@@ -86,4 +86,5 @@ dependencies {
 
 //    implementation project(":nativelib")
     implementation project(":lib_base")
+    implementation project(":lib_compose")
 }

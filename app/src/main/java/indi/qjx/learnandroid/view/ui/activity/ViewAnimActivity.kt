@@ -36,12 +36,12 @@ class ViewAnimActivity: BaseMvvmActivity<BaseViewModel, ActivityViewAnimBinding>
 
             val anim = ObjectAnimator.ofFloat(mViewDataBind.btnTest, "rotation", 0f, 270f)
             anim.addListener(object : Animator.AnimatorListener {
-                override fun onAnimationStart(animation: Animator?) {
+                override fun onAnimationStart(animation: Animator) {
                     val view = mViewDataBind.btnTest
                     Log.d(TAG, "onAnimationStart:width=${view.width},height=${view.height}, x=${view.x},y=${view.y},left = ${view.left}, top= ${view.top}, translationx=${view.translationX},translationy=${view.translationY}")
                 }
 
-                override fun onAnimationEnd(animation: Animator?) {
+                override fun onAnimationEnd(animation: Animator) {
                     val view = mViewDataBind.btnTest
                     Log.d(TAG, "onAnimationStart:width=${view.width},height=${view.height}, x=${view.x},y=${view.y},left = ${view.left}, top= ${view.top}, translationx=${view.translationX},translationy=${view.translationY}")
 
@@ -60,11 +60,12 @@ class ViewAnimActivity: BaseMvvmActivity<BaseViewModel, ActivityViewAnimBinding>
 
                 }
 
-                override fun onAnimationCancel(animation: Animator?) {
+                override fun onAnimationCancel(animation: Animator) {
                 }
 
-                override fun onAnimationRepeat(animation: Animator?) {
+                override fun onAnimationRepeat(animation: Animator) {
                 }
+
             })
             anim.start()
 
