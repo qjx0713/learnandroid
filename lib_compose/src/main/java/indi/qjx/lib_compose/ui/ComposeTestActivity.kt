@@ -8,33 +8,52 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,13 +63,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.myapplication.ui.theme.MyApplicationTheme
 import indi.qjx.lib_compose.R
+import indi.qjx.lib_compose.viewmodel.ComposeTestVM
 import kotlin.math.roundToInt
 
 class ComposeTestActivity : ComponentActivity() {
@@ -74,7 +96,28 @@ class ComposeTestActivity : ComponentActivity() {
 //                    PointerInputEvent()
 
                     //modifier功能3：使控件可点击、滚动、拖拽
-                    HighLevelCompose()
+//                    HighLevelCompose()
+
+                    //state
+//                    CallCounter()
+
+                    //LazyColumn和LazyRow
+//                    ScrollableList2()
+
+                    //  rememberLazyListState
+//                    MainLayout()
+                    
+                    //嵌套滚动情况一，内外滚动方向不一致
+//                    VerticalScrollable()
+
+                    //嵌套滚动情况二，内外滚动方向一致
+//                    VerticalScrollable2()
+
+                    //拼接不同类型子项
+//                    ScrollableList3(rememberLazyListState())
+
+                    //提升Lazy Layout性能
+                    SubVerticalScrollable2()
                 }
             }
         }
@@ -93,7 +136,7 @@ fun Greeting(name: String) {
 @Composable
 fun DefaultPreview() {
     MyApplicationTheme {
-        SimpleWidgetColumn()
+        CallCounter()
     }
 }
 
@@ -126,16 +169,11 @@ fun SimpleWidgetColumn() {
         /**
          * TextField
          */
-        TextField(
-            value = "",
-            onValueChange = {},
-            placeholder = {
-                Text(text = "Type something here")
-            },
-            colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color.White
-            )
-        )
+        var userInput by remember { mutableStateOf("") }
+        TextFieldWidget(userInput, { newValue ->
+            userInput = newValue
+        })
+
         /**
          * Image
          */
@@ -174,6 +212,15 @@ fun SimpleWidgetColumn() {
         )
     }
 
+}
+
+@Composable
+fun TextFieldWidget(value: String, onValueChange: (String) -> Unit, modifier: Modifier = Modifier) {
+    TextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = Modifier
+    )
 }
 
 
@@ -239,16 +286,16 @@ fun PointerInputEvent() {
 @Composable
 fun HighLevelCompose() {
     //点击
-/*    val context = LocalContext.current
-    Box(modifier = Modifier
-        .requiredSize(200.dp)
-        .background(Color.Blue)
-        .clickable {
-            Toast
-                .makeText(context, "Box is clicked", Toast.LENGTH_SHORT)
-                .show()
-        }
-    )*/
+    /*    val context = LocalContext.current
+        Box(modifier = Modifier
+            .requiredSize(200.dp)
+            .background(Color.Blue)
+            .clickable {
+                Toast
+                    .makeText(context, "Box is clicked", Toast.LENGTH_SHORT)
+                    .show()
+            }
+        )*/
 
     var offsetX by remember { mutableStateOf(0f) }
     var offsetY by remember { mutableStateOf(0f) }
@@ -267,3 +314,326 @@ fun HighLevelCompose() {
     )
 }
 
+
+@Composable
+fun Counter(count: Int, onIncrement: () -> Unit, modifier: Modifier = Modifier) {
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "$count",
+            fontSize = 50.sp
+        )
+        Button(
+            onClick = { onIncrement() }
+        ) {
+            Text(
+                text = "Click me",
+                fontSize = 26.sp
+            )
+        }
+    }
+}
+
+@Composable
+fun CallCounter(modifier: Modifier = Modifier, viewModel: ComposeTestVM = viewModel()) {
+    //使用liveData
+    /*    val count by viewModel.count.observeAsState(0)
+        val doubleCount by viewModel.doubleCount.observeAsState(0)*/
+
+    //使用Flow
+    val count by viewModel.count.collectAsState(0)
+    val doubleCount by viewModel.doubleCount.collectAsState(0)
+    Column {
+        Counter(
+            count = count,
+            onIncrement = { viewModel.incrementCount() },
+            modifier.fillMaxWidth()
+        )
+        Counter(
+            count = doubleCount,
+            onIncrement = { viewModel.incrementDoubleCount() },
+            modifier.fillMaxWidth()
+        )
+    }
+}
+
+//不带下标
+@Composable
+fun ScrollableList() {
+    val list = ('A'..'Z').map { it.toString() }
+    LazyColumn {
+        items(list.size) { index ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+            ) {
+                Text(
+                    text = list[index],
+                    textAlign = TextAlign.Center,
+                    fontSize = 20.sp,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .wrapContentHeight(Alignment.CenterVertically)
+                )
+            }
+        }
+    }
+}
+
+
+//带下标
+@Composable
+fun ScrollableList2() {
+    val list = ('A'..'Z').map { it.toString() }
+    LazyColumn(contentPadding = PaddingValues(top = 10.dp, bottom = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp)) {
+        itemsIndexed(list) { index, item ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+            ) {
+                Text(
+                    text = item,
+                    textAlign = TextAlign.Center,
+                    fontSize = 20.sp,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .wrapContentHeight(Alignment.CenterVertically)
+                )
+            }
+        }
+    }
+}
+
+
+//实现当A元素在屏幕上可见的时候，Fab按钮也是可见的。当A元素滑出了屏幕，Fab按钮也会随之消失
+@Composable
+fun MainLayout() {
+    val state = rememberLazyListState()
+    Box {
+        ScrollableList(state)
+        val shouldShowAddButton = state.firstVisibleItemIndex  == 0
+        AddButton(shouldShowAddButton)
+    }
+}
+
+@Composable
+fun ScrollableList(state: LazyListState) {
+    val list = ('A'..'Z').map { it.toString() }
+    LazyColumn(state = state) {
+        items(list) { letter ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+                    .padding(10.dp)
+            ) {
+                Text(
+                    text = letter,
+                    textAlign = TextAlign.Center,
+                    fontSize = 20.sp,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .wrapContentHeight(Alignment.CenterVertically)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun BoxScope.AddButton(isVisible: Boolean) {
+    if (isVisible) {
+        FloatingActionButton(
+            onClick = { /*TODO*/},
+            shape = CircleShape,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(20.dp)
+        ) {
+            Icon(Icons.Filled.Add, "Add Button")
+        }
+    }
+}
+
+
+
+//嵌套滚动情况一，内外滚动方向不一致
+@Composable
+fun VerticalScrollable() {
+    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+        HorizontalScrollable()
+        for (i in 1..10) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+                    .padding(10.dp)
+            ) {
+                Text(
+                    text = "Item $i",
+                    textAlign = TextAlign.Center,
+                    fontSize = 20.sp,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .wrapContentHeight(Alignment.CenterVertically)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun HorizontalScrollable() {
+    val list = ('A'..'Z').map { it.toString() }
+    LazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+        items(list) { letter ->
+            Card(
+                modifier = Modifier
+                    .width(120.dp)
+                    .height(200.dp)
+            ) {
+                Text(
+                    text = letter,
+                    textAlign = TextAlign.Center,
+                    fontSize = 20.sp,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .wrapContentHeight(Alignment.CenterVertically)
+                )
+            }
+        }
+    }
+}
+
+
+//嵌套滚动情况二，内外滚动方向一致
+@Composable
+fun VerticalScrollable2() {
+    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+        SubVerticalScrollable()
+        for (i in 1..10) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+                    .padding(10.dp)
+            ) {
+                Text(
+                    text = "Item $i",
+                    textAlign = TextAlign.Center,
+                    fontSize = 20.sp,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .wrapContentHeight(Alignment.CenterVertically)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun SubVerticalScrollable() {
+    val list = ('A'..'Z').map { it.toString() }
+    LazyColumn(modifier = Modifier.height(300.dp)) {
+        items(list) { letter ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(80.dp)
+                    .padding(10.dp)
+            ) {
+                Text(
+                    text = letter,
+                    textAlign = TextAlign.Center,
+                    fontSize = 20.sp,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .wrapContentHeight(Alignment.CenterVertically)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ImageHeader() {
+    Image(
+        painterResource(id = R.drawable.zn_img_smart_speaker),
+        contentDescription = "Header Image",
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+    )
+}
+
+@Composable
+fun ImageFooter() {
+    Image(
+        painterResource(id = R.drawable.zn_img_smart_speaker),
+        contentDescription = "Header Image",
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+    )
+}
+
+@Composable
+fun ScrollableList3(state: LazyListState) {
+    val list = (1..10).map { it.toString() }
+    LazyColumn(state = state) {
+        item {
+            ImageHeader()
+        }
+        items(list) { letter ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+                    .padding(10.dp)
+            ) {
+                Text(
+                    text = letter,
+                    textAlign = TextAlign.Center,
+                    fontSize = 20.sp,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .wrapContentHeight(Alignment.CenterVertically)
+                )
+            }
+        }
+        item {
+            ImageFooter()
+        }
+    }
+}
+
+
+@Composable
+fun SubVerticalScrollable2() {
+    val list = ('A'..'Z').map { it.toString() }
+    LazyColumn(modifier = Modifier.height(300.dp)) {
+        items(list, key = { it }) { letter ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(80.dp)
+                    .padding(10.dp)
+            ) {
+                Text(
+                    text = letter,
+                    textAlign = TextAlign.Center,
+                    fontSize = 20.sp,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .wrapContentHeight(Alignment.CenterVertically)
+                )
+            }
+        }
+    }
+}
