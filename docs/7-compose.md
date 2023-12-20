@@ -624,6 +624,7 @@ fun IconImage() {
 下面继续对这个例子进行改造，现在我们想要为图片增加一些边距。Compose中为控件增加边距是借助Modifier.padding()函数实现的，如下所示：
 
 ```
+
 @Composable
 fun IconImage() {
     Image(
@@ -650,19 +651,20 @@ fun IconImage() {
 那么很明显，改成先调用padding()函数，再调用border()函数，就可以实现外边距的效果：
 
 ```
-@Composable
-fun IconImage() {
-    Image(
-        painter = painterResource(id = R.drawable.icon),
-        contentDescription = "Icon Image",
-        modifier = Modifier
-            .wrapContentSize()
-            .background(Color.Gray)
-            .padding(18.dp)
-            .border(5.dp, Color.Magenta, CircleShape)
-            .clip(CircleShape)
-    )
-}
+
+	@Composable
+	fun IconImage() {
+	    Image(
+	        painter = painterResource(id = R.drawable.icon),
+	        contentDescription = "Icon Image",
+	        modifier = Modifier
+	            .wrapContentSize()
+	            .background(Color.Gray)
+	            .padding(18.dp)
+	            .border(5.dp, Color.Magenta, CircleShape)
+	            .clip(CircleShape)
+	    )
+	}
 ```
 
 重新运行一下程序看看吧：
@@ -680,10 +682,11 @@ fun IconImage() {
 根据Google官方推荐的Compose编码规范，任何一个Composable函数它的第一个非强制参数都应该是Modifier，就像这样：
 
 ```
-@Composable
-fun TestComposable(a: Int, b: String, modifier: Modifier = Modifier) {
-    
-}
+
+	@Composable
+	fun TestComposable(a: Int, b: String, modifier: Modifier = Modifier) {
+	    
+	}
 ```
 
 这个规范非常有讲究，因为Modifier是一个可选参数，因此它需要放到所有强制性参数的后面。这样调用方可以选择指定Modifier参数，也可以选择不指定。
@@ -697,28 +700,744 @@ fun TestComposable(a: Int, b: String, modifier: Modifier = Modifier) {
 控件的对齐方式应该由它的父布局决定，父布局可以根据其自身的显示需求决定如何对齐这个头像控件，那么为了让IconImage()函数拥有这个灵活性，我们就需要为其添加一个Modifier参数，如下所示：
 
 ```
-@Composable
-fun ParentLayout(modifier: Modifier = Modifier) {
-    Column {
-        IconImage(Modifier.align(Alignment.CenterHorizontally))
-    }
-}
 
-@Composable
-fun IconImage(modifier: Modifier = Modifier) {
-    Image(
-        painter = painterResource(id = R.drawable.icon),
-        contentDescription = "Icon Image",
-        modifier = modifier
-            .wrapContentSize()
-            .background(Color.Gray)
-            .padding(18.dp)
-            .border(5.dp, Color.Magenta, CircleShape)
-            .clip(CircleShape)
-    )
-}
+	@Composable
+	fun ParentLayout(modifier: Modifier = Modifier) {
+	    Column {
+	        IconImage(Modifier.align(Alignment.CenterHorizontally))
+	    }
+	}
+	
+	@Composable
+	fun IconImage(modifier: Modifier = Modifier) {
+	    Image(
+	        painter = painterResource(id = R.drawable.icon),
+	        contentDescription = "Icon Image",
+	        modifier = modifier
+	            .wrapContentSize()
+	            .background(Color.Gray)
+	            .padding(18.dp)
+	            .border(5.dp, Color.Magenta, CircleShape)
+	            .clip(CircleShape)
+	    )
+	}
 ```
 
 除了给IconImage()函数增加了Modifier参数之外，在为内部Image()控件指定行为的时候也要使用这个参数，而不是创建一个新的Modifier对象。
 这样我们在任何调用IconImage()的地方，就都可以根据实际需求来指定它的对齐方式了。
 这个例子充分展示了拥有Modifier参数的Composable函数具备更高的灵活性，Google提供的所有内置Composable函数都遵循了这个规范，因此希望你也能遵守吧。
+
+### State
+#### 使用
+```
+
+	@Composable
+	fun Counter(modifier: Modifier = Modifier) {
+	    val count = mutableStateOf(0)
+	    Column(
+	        modifier = modifier,
+	        horizontalAlignment = Alignment.CenterHorizontally
+	    ) {
+	        Text(
+	            text = "${count.value}",
+	            fontSize = 50.sp
+	        )
+	        Button(
+	            onClick = { count.value++ }
+	        ) {
+	            Text(
+	                text = "Click me",
+	                fontSize = 26.sp
+	            )
+	        }
+	    }
+	}
+```
+mutableStateOf()函数就是用于创建一个可变的State对象，参数中传入的是初始值。remember和mutableStateOf在Composable函数中几乎永远都是配套使用的。
+
+remember函数的作用是让其包裹住的变量在重组的过程中得到保留，从而就不会出现变量被重新初始化的情况了。
+#### 简化State代码
+普遍的写法是借助Kotlin的委托语法对来State的用法进一步精简，代码如下所示：
+```
+
+	@Composable
+	fun Counter(modifier: Modifier = Modifier) {
+	    var count by remember { mutableStateOf(0) }
+	    Column(
+	        modifier = modifier,
+	        horizontalAlignment = Alignment.CenterHorizontally
+	    ) {
+	        Text(
+	            text = "$count",
+	            fontSize = 50.sp
+	        )
+	        Button(
+	            onClick = { count++ }
+	        ) {
+	            Text(
+	                text = "Click me",
+	                fontSize = 26.sp
+	            )
+	        }
+	    }
+	}
+```
+使用by关键字替代了之前的等号，用委托的方式来为count变量赋值。
+
+别看只是改变了一下赋值方式，count变量的类型都会因此而发生变化。之前用等号赋值的时候，count的类型是MutableState<Int>，而改用by关键字赋值之后，count的类型就变成了Int。
+
+既然都是Int了，那么我们就可以直接对这个值进行读写操作了，而不用像之前那样再调用它的getValue()和setValue()函数，是不是代码变得更简单了？
+
+不过，如果你跟着我进行了同样的修改，大概率会出现一个编译错误，这是因为缺少import所导致的。在编译报错的地方通过快捷键Alt+Enter可以快速导入缺失的import，或者你也可以手动添加如下import来解决问题：
+
+```
+	
+	import androidx.compose.runtime.getValue
+	import androidx.compose.runtime.setValue
+```
+#### 恢复State数据
+rememberSaveable函数是remember函数的一个增强版，它唯一和remember不同的地方就是在于其包裹的数据在手机横竖屏旋转时会被保留下来。
+
+对代码进行如下修改：
+```
+
+
+	@Composable
+	fun Counter(modifier: Modifier = Modifier) {
+	    val count = rememberSaveable { mutableStateOf(0) }
+	    ...
+	}
+
+```
+
+#### 状态提升
+观察如下两个Composable函数：
+
+```
+	
+	@Composable
+	fun StatefulCounter(modifier: Modifier = Modifier) {
+	    val count by remember { mutableStateOf(0) }
+	    Text(
+	        text = "$count",
+	        fontSize = 50.sp
+	    )
+	}
+	
+	@Composable
+	fun StatelessCounter(count: Int, modifier: Modifier = Modifier) {
+	    Text(
+	        text = "$count",
+	        fontSize = 50.sp
+	    )
+	}
+```
+
+这两个函数很相似，都是使用一个Text控件来显示count变量的值。唯一的区别就是，第一个函数的count是由State对象赋值的，而第二个函数的count则是传递进来的参数。
+
+基于这点区别，我们就可以将第一个函数称之为有状态的Composable函数，而第二个函数则是无状态的Composable函数。
+
+根据Google给出的最佳实践准则，有状态的Composable函数通常在复用性和可测试性方面都会表现得比较差。
+
+因此，当我们编写Composable函数时，最理想的情况就是尽可能地让它成为一个无状态的Composable函数。
+
+那么怎样才能做到这一点呢？Compose提供了一种编程模式，叫State hoisting，中文译作状态提升。
+
+也就是说，我们要尽可能地把State提到更上一层的Composable函数当中，这样偏底层的Composable函数就可以成为无状态的函数，从而提高它们的复用性。
+
+而实现状态提升最核心的步骤只有两个。
+
+第一就是将原来声明State对象的写法改成用参数传递的写法，就像上面的示例一样。
+
+第二就是将写入State数据的地方改成用回调的方式来通知到上一层。
+
+```
+
+	@Composable
+	fun CallCounter(modifier: Modifier = Modifier) {
+	    var count by rememberSaveable { mutableStateOf(0) }
+	    Counter(
+	        count = count,
+	        onIncrement = { count++ },
+	        modifier
+	    )
+	}
+	
+	@Composable
+	fun Counter(count: Int, onIncrement: () -> Unit, modifier: Modifier = Modifier) {
+	    Column(
+	        modifier = modifier,
+	        horizontalAlignment = Alignment.CenterHorizontally
+	    ) {
+	        Text(
+	            text = "$count",
+	            fontSize = 50.sp
+	        )
+	        Button(
+	            onClick = { onIncrement() }
+	        ) {
+	            Text(
+	                text = "Click me",
+	                fontSize = 26.sp
+	            )
+	        }
+	    }
+	}
+```
+
+通常意义上来讲，像这种状态向下传递、事件向上传递的编程模式，我们称之为单向数据流模式（Unidirectional Data Flow）。而状态提升就是这种单向数据流模式在Compose中的具体应用。
+
+关于状态提升最后还有一个问题。既然我们可以将状态提升到上一层，那么是不是还可以再往上提一层，再往上呢？提到哪一层才能算结束？
+
+关于这个问题其实并没有一个非常精准的答案，基本上只要你想往上提，提多少层都是可以的，因此更多是根据你实际的业务需求来进行状态提升。
+
+不过虽然状态提升没有上限，下限却是有的，如果你的状态提升的层级不够高，那么你的代码将很难满足单向数据流的编程模式。
+
+
+以下是你应该考虑的状态提升最少应该到达哪个层级的关键因素：
+
+
+1. 如果有多个Composable函数需要读取同一个State对象，那么至少要将State提升到这些Composable函数共有的父级函数当中。
+
+2. 如果有多个Composable函数需要对同一个State对象进行写入，那么至少要将State提升到所有执行写入的Composable函数里调用层级最高的那一层。
+
+3. 如果某个事件的触发会导致两个或更多的State发生变更，那么这些State都应该提升到相同的层级。
+
+#### 结合ViewModel
+首先我们要引入如下两个库，这是Compose为了适配ViewModel和LiveData而专门设计的库：
+
+```
+
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2"
+    implementation "androidx.compose.runtime:runtime-livedata:1.5.1"
+```
+
+```
+
+	class ComposeTestVM : ViewModel() {
+	    //使用liveData
+	/*    private val _count = MutableLiveData<Int>()
+	    private val _doubleCount = MutableLiveData<Int>()
+	
+	    val count: LiveData<Int> = _count
+	    val doubleCount: LiveData<Int> = _doubleCount*/
+	
+	    //使用Flow
+	    private val _count = MutableStateFlow(0)
+	    private val _doubleCount = MutableStateFlow(0)
+	
+	    val count = _count.asStateFlow()
+	    val doubleCount = _doubleCount.asStateFlow()
+	
+	    fun incrementCount() {
+	        _count.value = (_count.value ?: 0).plus(1)
+	    }
+	
+	    fun incrementDoubleCount() {
+	        _doubleCount.value = (_doubleCount.value ?: 0).plus(2)
+	    }
+	}
+```
+```
+
+	@Composable
+	fun CallCounter(modifier: Modifier = Modifier, viewModel: ComposeTestVM = viewModel()) {
+	    //使用liveData
+	    /*    val count by viewModel.count.observeAsState(0)
+	        val doubleCount by viewModel.doubleCount.observeAsState(0)*/
+	
+	    //使用Flow
+	    val count by viewModel.count.collectAsState(0)
+	    val doubleCount by viewModel.doubleCount.collectAsState(0)
+	    Column {
+	        Counter(
+	            count = count,
+	            onIncrement = { viewModel.incrementCount() },
+	            modifier.fillMaxWidth()
+	        )
+	        Counter(
+	            count = doubleCount,
+	            onIncrement = { viewModel.incrementDoubleCount() },
+	            modifier.fillMaxWidth()
+	        )
+	    }
+	}
+```
+
+### LazyColumn和LazyRow
+#### 基本使用
+```
+
+	@Composable
+	fun ScrollableList() {
+	    val list = ('A'..'Z').map { it.toString() }
+	    LazyColumn {
+	        items(list.size) { index ->
+	            Card(
+	                modifier = Modifier
+	                    .fillMaxWidth()
+	                    .height(120.dp)
+	            ) {
+	                Text(
+	                    text = list[index],
+	                    textAlign = TextAlign.Center,
+	                    fontSize = 20.sp,
+	                    modifier = Modifier
+	                        .fillMaxSize()
+	                        .wrapContentHeight(Alignment.CenterVertically)
+	                )
+	            }
+	        }
+	    }
+	}
+
+
+	//或者下标+内容
+	@Composable
+	fun ScrollableList2() {
+	    val list = ('A'..'Z').map { it.toString() }
+	    LazyColumn {
+	        itemsIndexed(list) {index, item ->
+	            Card(
+	                modifier = Modifier
+	                    .fillMaxWidth()
+	                    .height(120.dp)
+	            ) {
+	                Text(
+	                    text = item,
+	                    textAlign = TextAlign.Center,
+	                    fontSize = 20.sp,
+	                    modifier = Modifier
+	                        .fillMaxSize()
+	                        .wrapContentHeight(Alignment.CenterVertically)
+	                )
+	            }
+	        }
+	    }
+	}
+```
+
+#### 边距设置
+
+首先我们可以在Card控件上通过Modifier.padding()设置一些边距，让每个子项之间都留有一些空隙：
+```
+
+	@Composable
+	fun ScrollableList() {
+	    val list = ('A'..'Z').map { it.toString() }
+	    LazyRow {
+	        itemsIndexed(list) { index, letter ->
+	            Card(
+	                modifier = Modifier
+	                    .width(120.dp)
+	                    .height(200.dp)
+	                    .padding(10.dp)
+	            ) {
+	                ...
+	            }
+	        }
+	    }
+	}
+```
+
+但如果你非常追求细节，你会发现第一个子项它的左右两侧边距是不一样的。这也难怪，毕竟左侧的边距我们设置的是10dp，而右侧的边距虽然也是10dp，但是它会再叠加第二个子项左侧的边距，于是就变成了20dp。
+
+最后一个子项也会面临同样的问题。
+
+那么如何解决这个问题呢？有一个非常简单的办法，就是我们给Lazy Layout整体的左右两边都再设置一个10dp的边距不就行了吗，代码如下：
+```
+
+	@Composable
+	fun ScrollableList() {
+	    val list = ('A'..'Z').map { it.toString() }
+	    LazyRow(modifier = Modifier.padding(start = 10.dp, end = 10.dp)) {
+	        ...
+	    }
+	}
+```
+然而这个解决方案并不完美，因为如果你尝试滚动一下列表的话，你会发现由于给Lazy Layout设置了边距，上下两侧内容会出现切割现象
+
+为了解决这个问题，我们可以使用专门为Lazy Layout打造的边距设置属性contentPadding，代码如下：
+```
+
+	@Composable
+	fun ScrollableList() {
+	    val list = ('A'..'Z').map { it.toString() }
+	    LazyRow(contentPadding = PaddingValues(start = 10.dp, end = 10.dp)) {
+	        ...
+	    }
+	}
+```
+最后，我们也可以不用借助Modifier.padding()来设置边距，Lazy Layout提供了专门给子项之间设置边距的属性，使用Arrangement.spacedBy()即可，代码示例如下：
+```
+
+	@Composable
+	fun ScrollableList() {
+	    val list = ('A'..'Z').map { it.toString() }
+	    LazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+	        ...
+	    }
+	}
+```
+
+#### rememberLazyListState
+我们在使用RecyclerView编写滚动列表的时候，除了实现最基础的滚动功能之外，通常还会让程序随着列表的滚动进行一些额外事件的响应。如随着滚动隐藏和显示某些控件。
+
+
+而如果想要在Lazy Layout中实现类似效果的话，则需要借助rememberLazyListState函数，我们接下来就瞧一瞧具体如何实现。
+```
+
+	val state = rememberLazyListState()
+	state.firstVisibleItemIndex
+	state.firstVisibleItemScrollOffset
+```
+调用rememberLazyListState函数，将能够得到一个LazyListState对象。
+
+我们可以通过访问它的firstVisibleItemIndex属性来得知当前第一个可见子项元素的下标。
+
+还可以访问firstVisibleItemScrollOffset属性来得到当前第一个可见子项元素的偏移距离。
+
+有了这些属性，就可以编写许多更加复杂的效果了。
+
+比如说根据Material Design的设计，许多应用程序主界面的右下角会放置一个Fab按钮。
+![](./image/7-5.png)
+这个Fab按钮可以提供一些常用的便捷操作，但同时也会遮盖一部分界面，如果一直显示的话对于用户来说并不友好。
+
+
+
+因此最好的设计方案就是，当用户向下滚动列表时，我们就认为用户不再需要和Fab按钮交互，此时将按钮进行隐藏。
+
+
+
+下面具体看一下如何在Compose中实现这种效果。
+```
+
+	@Composable
+	fun MainLayout() {
+	    val state = rememberLazyListState()
+	    Box {
+	        ScrollableList(state)
+	        val shouldShowAddButton = state.firstVisibleItemIndex  == 0
+	        AddButton(shouldShowAddButton)
+	    }
+	}
+	
+	@Composable
+	fun ScrollableList(state: LazyListState) {
+	    val list = ('A'..'Z').map { it.toString() }
+	    LazyColumn(state = state) {
+	        items(list) { letter ->
+	            Card(
+	                modifier = Modifier
+	                    .fillMaxWidth()
+	                    .height(120.dp)
+	                    .padding(10.dp)
+	            ) {
+	                Text(
+	                    text = letter,
+	                    textAlign = TextAlign.Center,
+	                    fontSize = 20.sp,
+	                    modifier = Modifier
+	                        .fillMaxSize()
+	                        .wrapContentHeight(Alignment.CenterVertically)
+	                )
+	            }
+	        }
+	    }
+	}
+	
+	@Composable
+	fun BoxScope.AddButton(isVisible: Boolean) {
+	    if (isVisible) {
+	        FloatingActionButton(
+	            onClick = { /*TODO*/},
+	            shape = CircleShape,
+	            modifier = Modifier
+	                .align(Alignment.BottomEnd)
+	                .padding(20.dp)
+	        ) {
+	            Icon(Icons.Filled.Add, "Add Button")
+	        }
+	    }
+	}
+```
+
+代码并不算很长，我直接就全贴出来了。
+
+
+
+其中AddButton()函数就是用于定义Fab按钮的，我们将它放置在了屏幕的右下角，并且它的显示状态是受到isVisible这个参数控制的。
+
+
+而ScrollableList()函数还是用于定义滚动列表，只不过这次我们在LazyColumn的参数中指定了一个LazyListState对象，这样就可以调用刚才所学的firstVisibleItemIndex等属性了。
+
+最后在MainLayout()函数中将以上两个函数都包含进去，并加了一个布尔变量，只有firstVisibleItemIndex为0，也就是列表中第一个子项元素可见的时候，Fab按钮才显示。
+
+在上述代码中挖了一个大坑，它是有非常严重的性能问题的。只不过这个问题与我们今天要学的Lazy Layout无关，我不想偏离主题太远再去讲其他的知识点，下篇文章中讲解如何解决这个性能问题。
+
+#### 嵌套滚动 
+RecyclerView是支持嵌套滚动的，但我认为绝大部分的情况下大家应该都用不到它。每当你认为自己需要用到嵌套滚动时，我觉得都应该先暂停一下，想想是不是有其他的替代方案，如ConcatAdapter等。
+
+
+而到了Compose当中，这下好了，Lazy Layout压根就不支持嵌套滚动，这下直接就把大家的念象给断了。
+
+
+那么我为什么还要写这个主题呢？因为Compose中还允许一些场景和逻辑都比较合理的嵌套滚动，我们主要来看这部分的用法。
+
+
+首先第一种合理的嵌套滚动，就是内层和外层的列表滚动方向并不一致，这样它们之间是没有滑动事件冲突的，因此合情合理。示例代码如下：
+```
+
+	@Composable
+	fun VerticalScrollable() {
+	    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+	        HorizontalScrollable()
+	        for (i in 1..10) {
+	            Card(
+	                modifier = Modifier
+	                    .fillMaxWidth()
+	                    .height(120.dp)
+	                    .padding(10.dp)
+	            ) {
+	                Text(
+	                    text = "Item $i",
+	                    textAlign = TextAlign.Center,
+	                    fontSize = 20.sp,
+	                    modifier = Modifier
+	                        .fillMaxSize()
+	                        .wrapContentHeight(Alignment.CenterVertically)
+	                )
+	            }
+	        }
+	    }
+	}
+	
+	@Composable
+	fun HorizontalScrollable() {
+	    val list = ('A'..'Z').map { it.toString() }
+	    LazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+	        items(list) { letter ->
+	            Card(
+	                modifier = Modifier
+	                    .width(120.dp)
+	                    .height(200.dp)
+	            ) {
+	                Text(
+	                    text = letter,
+	                    textAlign = TextAlign.Center,
+	                    fontSize = 20.sp,
+	                    modifier = Modifier
+	                        .fillMaxSize()
+	                        .wrapContentHeight(Alignment.CenterVertically)
+	                )
+	            }
+	        }
+	    }
+	}
+```
+这里我们定义了两个不同方向的滚动列表函数，VerticalScrollable()和HorizontalScrollable()。
+
+其中，VerticalScrollable()函数是垂直方向的滚动列表，它在第一行的位置又嵌套了HorizontalScrollable()函数。
+
+
+由于嵌套的滚列表方向并不一致，因此这种情况是完全合法的.
+
+
+再来看第二种合理的嵌套滚动，即使内层和外层的列表滚动方向一致，只要内层列表在滚动方向上的尺寸是固定的，那么Compose对此仍然是支持的。
+
+
+也就是说，如果是纵向嵌套滚动，那么内层列表的高度必须是固定的。如果是横向嵌套滚动，那么内层列表的宽度必须是固定的。示例代码如下：
+```
+
+	@Composable
+	fun VerticalScrollable() {
+	    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+	        SubVerticalScrollable()
+	        for (i in 1..10) {
+	            Card(
+	                modifier = Modifier
+	                    .fillMaxWidth()
+	                    .height(120.dp)
+	                    .padding(10.dp)
+	            ) {
+	                Text(
+	                    text = "Item $i",
+	                    textAlign = TextAlign.Center,
+	                    fontSize = 20.sp,
+	                    modifier = Modifier
+	                        .fillMaxSize()
+	                        .wrapContentHeight(Alignment.CenterVertically)
+	                )
+	            }
+	        }
+	    }
+	}
+	
+	@Composable
+	fun SubVerticalScrollable() {
+	    val list = ('A'..'Z').map { it.toString() }
+	    LazyColumn(modifier = Modifier.height(300.dp)) {
+	        items(list) { letter ->
+	            Card(
+	                modifier = Modifier
+	                    .fillMaxWidth()
+	                    .height(80.dp)
+	                    .padding(10.dp)
+	            ) {
+	                Text(
+	                    text = letter,
+	                    textAlign = TextAlign.Center,
+	                    fontSize = 20.sp,
+	                    modifier = Modifier
+	                        .fillMaxSize()
+	                        .wrapContentHeight(Alignment.CenterVertically)
+	                )
+	            }
+	        }
+	    }
+	}
+```
+
+这里我们定义了两个相同方向的滚动列表函数，VerticalScrollable()和SubVerticalScrollable()。
+
+其中，VerticalScrollable()函数是垂直方向的滚动列表，它在第一行的位置又嵌套了SubVerticalScrollable()函数。
+
+由于SubVerticalScrollable()中的滚动列表高度是固定的，我们设置成了300dp，因此这种情况也是合法的.
+
+除了这两种情况以外的嵌套滚动都是不合法的，Compose也不会惯着我们，用错了直接就会崩溃，不信你可以试一试。
+
+#### 拼接不同类型子项
+刚才有提到，RecyclerView中一些不合理的嵌套滚动需求其实可以考虑使用ConcatAdapter来解决。
+
+ConcatAdapter是用于将不同类型的子项元素拼接到一起，让它们形成一个整体可滚动的列表。那么Lazy Layout中是否也可以实现与ConcatAdapter类似的效果呢？答案是肯定的，而且更加简单。
+
+
+目前我们已经知道，可以在Lazy Layout中添加一个items函数来指定要滚动的数据源列表。你当然也可以添加多个items函数来指定不同类型的数据源列表，这样就可以将不同类型的子项元素拼接到一起了。
+
+
+除此之外，还可以在Lazy Layout中添加item函数来指定单个数据项，最终它们都会形成一个整体可滚动的列表。
+
+下面我们来看一段代码示例：
+```
+	@Composable
+	fun ImageHeader() {
+	    Image(
+	        painterResource(id = R.drawable.header),
+	        contentDescription = "Header Image",
+	        modifier = Modifier
+	            .fillMaxWidth()
+	            .wrapContentHeight()
+	    )
+	}
+	
+	@Composable
+	fun ImageFooter() {
+	    Image(
+	        painterResource(id = R.drawable.footer),
+	        contentDescription = "Header Image",
+	        modifier = Modifier
+	            .fillMaxWidth()
+	            .wrapContentHeight()
+	    )
+	}
+	
+	@Composable
+	fun ScrollableList(state: LazyListState) {
+	    val list = (1..10).map { it.toString() }
+	    LazyColumn(state = state) {
+	        item {
+	            ImageHeader()
+	        }
+	        items(list) { letter ->
+	            Card(
+	                modifier = Modifier
+	                    .fillMaxWidth()
+	                    .height(120.dp)
+	                    .padding(10.dp)
+	            ) {
+	                Text(
+	                    text = letter,
+	                    textAlign = TextAlign.Center,
+	                    fontSize = 20.sp,
+	                    modifier = Modifier
+	                        .fillMaxSize()
+	                        .wrapContentHeight(Alignment.CenterVertically)
+	                )
+	            }
+	        }
+	        item {
+	            ImageFooter()
+	        }
+	    }
+	}
+```
+
+这里定义了ImageHeader()和ImageFooter()这两个Composable函数，里面你可以随意放置任意类型的控件。简单起见，我们就放了两张图片。
+
+
+接下来在LazyColumn当中，我们使用item函数将ImageHeader()和ImageFooter()分别引入到了头部和尾部，而主间则是使用items函数添加的列表型数据。
+
+通过这样一种写法，就可以将这三种不同类型内容合并成一个整体可滚动的列表，等同于ConcatAdapter所能完成的功能，并且代码还要更加的简单。
+
+#### 提升Lazy Layout性能
+目前我们已经将Lazy Layout相关的主要用法都学习的差不多了，最后来关注一下性能方面的问题。
+
+上述所演示的代码有一个共性，都是固定数据列表，即我们没有对数据列表进行过增加或删除。而一旦执行了这些操作，我们就可能会遇到比较严重的性能问题。
+
+为了能够清晰地解释这个问题，我来举一个数据结构上的例子。
+
+
+数组相信大家都非常熟悉，如果我有一个长度为10的数组：
+
+[1,2,3,4,5,6,7,8,9,10]
+
+现在我想要往这个数组的头部再添加一个元素0，让数组变成：
+
+[0,1,2,3,4,5,6,7,8,9,10]
+
+
+它的时间复杂度一定是O(n)，因为为了向数组的头部添加一个元素，需要将原来的每一个元素都往后移动一位。数组越长，这个操作的成本就越高。
+
+删除头部元素也是一样的道理，需要将原来的每一个元素都往前移动一位，因此时间复杂度也是O(n)。
+
+
+为什么要讲这样一个例子呢？是因为Compose默认的重组规则也是如此。
+
+
+在默认情况下，一个Composable函数是否要发生重组，除了使用我们上篇文章中学习的State之外，当Composable函数的位置发生了变动，也会触发重组行为。
+
+也就是说，Lazy Layout如果一屏显示了10个元素，现在删除了第一个元素，剩余的9个元素因为位置都发生了变动，它们所对应的Composable函数全部会重组一遍，这就是非常大的性能开销。
+
+
+相比于RecyclerView，基于Compose的Lazy Layout在这一点上确实非常劣势，因为RecyclerView就完全不会有重组的困扰，只需要offset一下子项的位置就可以了。
+
+
+那么Lazy Layout要怎么解决这个问题呢？方案就是，我们需要找到一个能够标识子项唯一性的id值，用于替换之前基于位置变动去触发重组的机制。
+
+至于这个id值是什么？在哪里？你要自己想办法。
+
+
+比如说我们上述举的例子当中，由于每个数值都不相同，那么就可以直接拿这些数值来当id。
+
+
+如果你使用的数据源是更复杂的对象类型，那么就需要想办法从这些对象中找到能够标识它唯一性的值来当id。
+
+确定好了id之后，只需要对Lazy Layout中的代码进行如下修改即可：
+```
+
+	@Composable
+	fun SubVerticalScrollable() {
+	    val list = ('A'..'Z').map { it.toString() }
+	    LazyColumn(modifier = Modifier.height(300.dp)) {
+	        items(list, key = { it }) { letter ->
+	            ...
+	        }
+	    }
+	}
+```
+这里给items函数新增了一个key参数，这个参数就是用于指定每个子项的唯一id的。由于我们所使用的数据A-Z本身每个值就是唯一的，因此这里直接指定it即可。
+
+
+添加了key参数之后，Compose编译器就有了一个唯一标识符来精准定位到每个Composable函数，而不是像之前那样只能基于Composable函数的位置来定位了。
+
+这样，不管是对Lazy Layout中的元素进行添加、删除、甚至是重新排序，都不会导致多余的重组发生，性能也就大大提升了。
